@@ -1,7 +1,12 @@
-export default function App() {
+import React from 'react';
+import BoardPage from './pages/BoardPage';
+
+function App() {
   return (
     <div>
-      <h1>bugboard</h1>
+      <BoardPage />
     </div>
   );
 }
+
+export default App;
