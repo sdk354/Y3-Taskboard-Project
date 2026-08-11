@@ -25,12 +25,12 @@ const Column = ({ title, tasks, onDeleteTask, onMoveTask }) => {
       </div>
       <div>
         {tasks.map((task) => (
-          <TaskCard 
-          key={task.id}
-          task={task}
-          onDeleteTask={onDeleteTask}
-          onMoveTask={onMoveTask}
-           />
+          <TaskCard
+            key={task.id}
+            task={task}
+            onDeleteTask={onDeleteTask}
+            onMoveTask={onMoveTask}
+          />
         ))}
       </div>
     </div>

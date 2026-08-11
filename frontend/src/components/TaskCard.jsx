@@ -1,8 +1,15 @@
 import React from "react";
+import { STATUSES } from "../data/statuses";
 
-const TaskCard = ({ task, onDeleteTask, onMoveTask }) => {
+const TaskCard = ({ task, onDeleteTask = () => {}, onMoveTask = () => {} }) => {
+  const handleDelete = () => {
+    if (window.confirm(`Delete "${task.title}"?`)) {
+      onDeleteTask(task.id);
+    }
+  };
+
   return (
-    <div className="card" style={{ margin: "10px 0", padding: "15px" }}>
+    <div className="card" style={{ margin: "10px 0" }}>
       <h4 style={{ margin: "0 0 10px 0" }}>{task.title}</h4>
 
       <p style={{ margin: "5px 0", fontSize: "14px" }}>
@@ -14,34 +21,18 @@ const TaskCard = ({ task, onDeleteTask, onMoveTask }) => {
       </p>
 
       <div style={{ marginTop: "10px" }}>
-        {task.status !== "To Do" && (
+        {STATUSES.filter((status) => status !== task.status).map((status) => (
           <button
-            onClick={() => onMoveTask(task.id, "To Do")}
+            key={status}
+            onClick={() => onMoveTask(task.id, status)}
+            aria-label={`Move ${task.title} to ${status}`}
             style={{ marginRight: "5px" }}
           >
-            Move to To Do
+            Move to {status}
           </button>
-        )}
+        ))}
 
-        {task.status !== "In Progress" && (
-          <button
-            onClick={() => onMoveTask(task.id, "In Progress")}
-            style={{ marginRight: "5px" }}
-          >
-            Move to In Progress
-          </button>
-        )}
-
-        {task.status !== "Done" && (
-          <button
-            onClick={() => onMoveTask(task.id, "Done")}
-            style={{ marginRight: "5px" }}
-          >
-            Move to Done
-          </button>
-        )}
-
-        <button onClick={() => onDeleteTask(task.id)}>
+        <button onClick={handleDelete} aria-label={`Delete ${task.title}`}>
           Delete
         </button>
       </div>
