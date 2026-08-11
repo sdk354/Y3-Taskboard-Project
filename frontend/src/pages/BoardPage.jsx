@@ -16,6 +16,22 @@ const BoardPage = () => {
     setTasks((prevTasks) => [...prevTasks, newTask]);
   };
 
+  // Handlers for deleting and moving tasks
+  const handleDeleteTask = (taskId) => {
+    setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
+  };
+
+  const handleMoveTask = (taskId, newStatus) => {
+    // Ignore anything that isn't a known status so a bad caller
+    // can't strand a task outside every column
+    if (!STATUSES.includes(newStatus)) return;
+    setTasks((prevTasks) =>
+      prevTasks.map((task) =>
+        task.id === taskId ? { ...task, status: newStatus } : task,
+      ),
+    );
+  };
+
   return (
     <div style={{ padding: "20px" }}>
       <TaskForm onAddTask={handleAddTask} />
@@ -26,6 +42,8 @@ const BoardPage = () => {
             key={status}
             title={status}
             tasks={getTasksByStatus(status)}
+            onDeleteTask={handleDeleteTask}
+            onMoveTask={handleMoveTask}
           />
         ))}
       </div>

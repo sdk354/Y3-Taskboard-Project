@@ -1,7 +1,7 @@
 import React from "react";
 import TaskCard from "./TaskCard";
 
-const Column = ({ title, tasks }) => {
+const Column = ({ title, tasks, onDeleteTask, onMoveTask }) => {
   return (
     <div
       style={{
@@ -25,7 +25,12 @@ const Column = ({ title, tasks }) => {
       </div>
       <div>
         {tasks.map((task) => (
-          <TaskCard key={task.id} task={task} />
+          <TaskCard
+            key={task.id}
+            task={task}
+            onDeleteTask={onDeleteTask}
+            onMoveTask={onMoveTask}
+          />
         ))}
       </div>
     </div>
