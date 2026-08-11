@@ -16,6 +16,23 @@ const BoardPage = () => {
     setTasks((prevTasks) => [...prevTasks, newTask]);
   };
 
+  // Function to handle adding the delete and move
+  const handleDeleteTask = (taskId) => {
+  setTasks((prevTasks) =>
+    prevTasks.filter((task) => task.id !== taskId)
+  );
+};
+
+const handleMoveTask = (taskId, newStatus) => {
+  setTasks((prevTasks) =>
+    prevTasks.map((task) =>
+      task.id === taskId
+        ? { ...task, status: newStatus }
+        : task
+    )
+  );
+};
+
   return (
     <div style={{ padding: "20px" }}>
       <TaskForm onAddTask={handleAddTask} />
@@ -26,6 +43,8 @@ const BoardPage = () => {
             key={status}
             title={status}
             tasks={getTasksByStatus(status)}
+            onDeleteTask={handleDeleteTask}
+            onMoveTask={handleMoveTask}
           />
         ))}
       </div>
