@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { STATUSES } from "../data/statuses";
 
 const TaskCard = ({ task, onDeleteTask = () => {}, onMoveTask = () => {} }) => {
@@ -9,8 +10,10 @@ const TaskCard = ({ task, onDeleteTask = () => {}, onMoveTask = () => {} }) => {
   };
 
   return (
-    <div className="card" style={{ margin: "10px 0" }}>
-      <h4 style={{ margin: "0 0 10px 0" }}>{task.title}</h4>
+    <div className="card task-card" style={{ margin: "10px 0" }}>
+      <h4 style={{ margin: "0 0 10px 0" }}>
+        <Link to={`/tasks/${task.id}`}>{task.title}</Link>
+      </h4>
 
       <p style={{ margin: "5px 0", fontSize: "14px" }}>
         <strong>Assignee:</strong> {task.assignee}

@@ -8,6 +8,28 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 
+.task-card {
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.task-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Card title links to the task detail page */
+.task-card h4 a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.task-card h4 a:hover,
+.task-card h4 a:focus {
+  text-decoration: underline;
+}
+
 /* Labelled field in the task form */
 .form-field {
   display: flex;
