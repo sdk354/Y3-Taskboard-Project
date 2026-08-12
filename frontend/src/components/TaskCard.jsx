@@ -1,15 +1,33 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { STATUSES } from "../data/statuses";
 
-const TaskCard = ({ task, onDeleteTask = () => {}, onMoveTask = () => {} }) => {
-  const handleDelete = () => {
+const TaskCard = ({ task, onDeleteTask = () => { }, onMoveTask = () => { } }) => {
+  const navigate = useNavigate();
+
+  const handleDelete = (e) => {
+    e.stopPropagation();
+
     if (window.confirm(`Delete "${task.title}"?`)) {
       onDeleteTask(task.id);
     }
   };
 
+  const handleMove = (e, status) => {
+    e.stopPropagation();
+    onMoveTask(task.id, status);
+  };
+
+  const handleCardClick = () => {
+    navigate(`/tasks/${task.id}`);
+  };
+
   return (
-    <div className="card" style={{ margin: "10px 0" }}>
+    <div
+      className="card task-card"
+      style={{ margin: "10px 0", cursor: "pointer" }}
+      onClick={handleCardClick}
+    >
       <h4 style={{ margin: "0 0 10px 0" }}>{task.title}</h4>
 
       <p style={{ margin: "5px 0", fontSize: "14px" }}>
@@ -24,7 +42,7 @@ const TaskCard = ({ task, onDeleteTask = () => {}, onMoveTask = () => {} }) => {
         {STATUSES.filter((status) => status !== task.status).map((status) => (
           <button
             key={status}
-            onClick={() => onMoveTask(task.id, status)}
+            onClick={(e) => handleMove(e, status)}
             aria-label={`Move ${task.title} to ${status}`}
             style={{ marginRight: "5px" }}
           >
@@ -32,7 +50,10 @@ const TaskCard = ({ task, onDeleteTask = () => {}, onMoveTask = () => {} }) => {
           </button>
         ))}
 
-        <button onClick={handleDelete} aria-label={`Delete ${task.title}`}>
+        <button
+          onClick={handleDelete}
+          aria-label={`Delete ${task.title}`}
+        >
           Delete
         </button>
       </div>
