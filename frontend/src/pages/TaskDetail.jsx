@@ -1,19 +1,17 @@
 import React from "react";
 import { useParams, Link } from "react-router-dom";
-import { useTasks } from "../context/TaskContext";
+import { useTasks } from "../hooks/useTasks";
+import NotFound from "./NotFound";
 
 function TaskDetail() {
   const { id } = useParams();
-  const { getTaskById } = useTasks();
+  const { tasks } = useTasks();
 
-  const task = getTaskById(id);
+  const task = tasks.find((t) => t.id === id);
 
   if (!task) {
     return (
-      <div style={{ padding: "20px" }}>
-        <h2>Task Not Found</h2>
-        <Link to="/">Back to Board</Link>
-      </div>
+      <NotFound title="Task Not Found" message="No task exists with this id." />
     );
   }
 

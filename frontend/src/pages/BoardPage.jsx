@@ -1,16 +1,11 @@
 import React from "react";
 import Column from "../components/Column";
 import TaskForm from "../components/TaskForm";
-import { useTasks } from "../context/TaskContext";
+import { useTasks } from "../hooks/useTasks";
 import { STATUSES } from "../data/statuses";
 
 const BoardPage = () => {
-  const {
-    tasks,
-    addTask,
-    deleteTask,
-    moveTask
-  } = useTasks();
+  const { tasks, addTask, deleteTask, moveTask } = useTasks();
 
   const getTasksByStatus = (status) => {
     return tasks.filter((task) => task.status === status);
