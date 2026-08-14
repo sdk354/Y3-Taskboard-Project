@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="79ec75fe-c2fb-44de-bff8-51606f7175c4" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="79ec75fe-c2fb-44de-bff8-51606f7175c4" name="Changes" comment="filter and search" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -63,11 +61,24 @@
       <option name="presentableId" value="Default" />
       <updated>1786379946421</updated>
       <workItem from="1786379948085" duration="3031000" />
-      <workItem from="1786698701713" duration="3715000" />
+      <workItem from="1786698701713" duration="4259000" />
     </task>
+    <task id="LOCAL-00001" summary="filter and search">
+      <option name="closed" value="true" />
+      <created>1786703177819</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1786703177819</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="filter and search" />
+    <option name="LAST_COMMIT_MESSAGE" value="filter and search" />
   </component>
 </project>
