@@ -120,10 +120,25 @@ select:focus {
   text-underline-offset: 5px;
 }
 
-.board-search {
+/* middle zone floats between the logo and the right-side controls */
+.topbar-center {
   flex: 1;
-  min-width: 200px;
-  max-width: 560px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.board-search {
+  flex: 0 1 420px;
+  min-width: 160px;
   padding: 10px 16px;
   border: 2px solid var(--outline);
   border-radius: 10px;
@@ -227,7 +242,7 @@ select:focus {
   animation: fade-up 0.3s ease;
 }
 
-/* status/assignee selects */
+/* status/assignee filters */
 .filter-row {
   display: flex;
   gap: 10px;
@@ -235,13 +250,70 @@ select:focus {
   margin-bottom: 16px;
 }
 
-.filter-select {
-  padding: 6px 10px;
+/* custom dropdowns */
+.dropdown {
+  position: relative;
+}
+
+.dropdown-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
   border: 2px solid var(--outline);
   border-radius: 8px;
   background: var(--surface);
   color: var(--ink);
   font-size: 13px;
+  font-weight: 600;
+}
+
+.dropdown-chevron {
+  font-size: 10px;
+  transition: transform 0.15s ease;
+}
+
+.dropdown-toggle[aria-expanded="true"] .dropdown-chevron {
+  transform: rotate(180deg);
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 100%;
+  white-space: nowrap;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: var(--surface);
+  border: 2px solid var(--outline);
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  z-index: 20;
+  animation: fade-up 0.15s ease;
+}
+
+.dropdown-option {
+  width: 100%;
+  text-align: left;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.dropdown-option:hover {
+  background: rgba(47, 95, 224, 0.12);
+  transform: none;
+}
+
+.dropdown-option.selected {
+  background: #f0c545;
+  color: #1d1d20;
 }
 
 /* columns */
@@ -792,10 +864,13 @@ select:focus {
     gap: 10px;
   }
 
+  .topbar-center {
+    flex-wrap: wrap;
+  }
+
   .board-search {
     order: 10;
     flex-basis: 100%;
-    max-width: none;
   }
 
   .filter-row {
