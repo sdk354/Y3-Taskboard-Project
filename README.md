@@ -15,8 +15,16 @@ Built up over 5 weekly sessions, one layer per session:
 | 4 | Tests (Jest, RTL, Supertest) + GitHub Actions CI |
 | 5 | Socket.io real-time sync, Docker, deployment |
 
-Right now we're on session 1, so only the frontend scaffold exists. The `server/`
-folder will come in session 2.
+Session 1 (the frontend) is done — tasks 1 through 6 are merged. The board has
+create/move/delete with undo, drag and drop between columns, search + filters
+that live in the URL, routing with a task detail page (editable), light/dark
+mode, and loading/error/empty states backed by a fake API layer in
+`src/api/tasks.js`. The `server/` folder comes in session 2, at which point the
+fake API gets swapped for real fetch calls.
+
+Live at **https://bugboard-nsbm.vercel.app** — deploys automatically from main
+via Vercel, and every PR gets its own preview link. Add `?fail` to the URL to
+see the error state.
 
 ## Running it
 
@@ -37,17 +45,14 @@ Opens on http://localhost:5173.
 ```
 frontend/          Vite + React app
   src/
-    api/           fetch wrappers (components never call fetch directly)
-    components/    reusable bits (TaskCard, Column, etc.)
-    context/       shared state providers
-    data/          mock data until the real API exists
-    hooks/
-    pages/         one component per route
-    utils/
+    api/           fake api for now (delay + localStorage), real fetch later
+    components/    TaskCard, Column, TopBar, TaskForm, Dropdown, states, ...
+    context/       TaskProvider (board state) and ThemeProvider
+    data/          seed tasks, status constants, team members
+    hooks/         useTasks / useTheme
+    pages/         BoardPage, TaskDetail, NotFound
+    utils/         filtering, date helpers, note colours
 ```
-
-Most of these folders are empty for now — they get filled in as the assignment
-tasks are done.
 
 ## Working agreement
 
