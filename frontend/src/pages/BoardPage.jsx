@@ -32,7 +32,11 @@ const BoardPage = () => {
   );
 
   const visibleTasks = filterTasks(tasks, filters);
-  const byStatus = (s) => visibleTasks.filter((t) => t.status === s);
+  // earliest due date first, so overdue stuff sits at the top
+  const byStatus = (s) =>
+    visibleTasks
+      .filter((t) => t.status === s)
+      .sort((a, b) => (a.dueDate || "9999").localeCompare(b.dueDate || "9999"));
   const assignees = [...new Set(tasks.map((t) => t.assignee))];
 
   const handleAddTask = (task) => {

@@ -2,24 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { STATUS, STATUSES } from "../data/statuses";
 import { formatShortDate, isOverdue } from "../utils/dates";
-
-const noteClass = (task) => {
-  if (task.status === STATUS.DONE) return "note-green";
-  if (task.type === "bug") {
-    return task.severity === "minor" ? "note-yellow" : "note-pink";
-  }
-  return "note-blue";
-};
-
-const typeChip = (task) => {
-  if (task.type !== "bug") return { label: "TASK", className: "chip-task" };
-  if (task.status === STATUS.DONE)
-    return { label: "FIXED", className: "chip-fixed" };
-  return {
-    label: (task.severity || "bug").toUpperCase(),
-    className: `chip-${task.severity || "major"}`,
-  };
-};
+import { noteClass, typeChip } from "../utils/noteStyle";
 
 const initials = (name = "?") =>
   name.length <= 2
@@ -36,11 +19,8 @@ const TaskCard = ({ task, onDeleteTask = () => {}, onMoveTask = () => {} }) => {
   const overdue = isOverdue(task);
   const chip = typeChip(task);
 
-  const handleDelete = () => {
-    if (window.confirm(`Delete "${task.title}"?`)) {
-      onDeleteTask(task.id);
-    }
-  };
+  // no confirm dialog, the undo toast covers mistakes
+  const handleDelete = () => onDeleteTask(task.id);
 
   return (
     <div

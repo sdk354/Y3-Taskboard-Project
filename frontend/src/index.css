@@ -607,23 +607,188 @@ select:focus {
 /* detail page */
 .detail-page {
   padding: 24px;
-  max-width: 560px;
+  max-width: 620px;
+  margin: 0 auto;
   animation: fade-up 0.3s ease;
 }
 
-.page-title {
-  font-family: "Kalam", cursive;
-}
-
-.detail-title {
-  font-family: "Kalam", cursive;
-  font-size: 23px;
-  margin-top: 0;
-}
-
 .back-link {
+  display: inline-block;
   color: var(--accent);
   font-weight: 600;
+  text-decoration: none;
+  margin-bottom: 8px;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
+.detail-note {
+  --tilt: 0.4deg;
+  cursor: default;
+  margin: 24px 0;
+  padding: 34px 26px 24px;
+}
+
+/* no lift on the big note, it's not draggable */
+.detail-note:hover {
+  transform: rotate(var(--tilt));
+  box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.18);
+}
+
+.detail-note-title {
+  font-size: 30px;
+  font-weight: 400;
+  margin: 14px 0 10px;
+  line-height: 1.2;
+}
+
+.note-green .detail-note-title {
+  text-decoration: line-through;
+}
+
+.detail-rows p {
+  margin: 7px 0;
+  font-size: 18px;
+}
+
+.detail-rows strong {
+  display: inline-block;
+  min-width: 90px;
+  font-family: "Baloo 2", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #3c3c40;
+}
+
+.detail-rows .overdue {
+  color: #d02b2b;
+  font-weight: 700;
+}
+
+.detail-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.detail-delete {
+  padding: 9px 18px;
+  border-radius: 10px;
+  border: 2px solid #a83030;
+  background: #d64545;
+  color: #fff;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.detail-delete:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 3px 10px rgba(214, 69, 69, 0.4);
+}
+
+.detail-cancel {
+  padding: 9px 18px;
+  border-radius: 10px;
+  border: 2px solid rgba(0, 0, 0, 0.4);
+  background: rgba(255, 255, 255, 0.6);
+  color: #1d1d20;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+/* edit form sits right on the note */
+.detail-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.detail-edit-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.detail-edit input,
+.detail-edit select {
+  border: 2px solid rgba(0, 0, 0, 0.4);
+  background: rgba(255, 255, 255, 0.65);
+  color: #1d1d20;
+  border-radius: 8px;
+  padding: 7px 10px;
+}
+
+.detail-edit .form-field label {
+  color: #3c3c40;
+}
+
+.detail-title-input {
+  font-family: "Kalam", cursive;
+  font-size: 24px;
+  width: 100%;
+}
+
+/* undo toast */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 18px;
+  border: 2px solid var(--outline);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  animation: fade-up 0.25s ease;
+  z-index: 50;
+}
+
+.toast button {
+  border: none;
+  background: none;
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 14px;
+  padding: 2px 4px;
+}
+
+.toast button:hover {
+  text-decoration: underline;
+}
+
+/* small screens: stack the columns */
+@media (max-width: 900px) {
+  .board-columns {
+    flex-direction: column;
+  }
+
+  .column {
+    width: 100%;
+    min-height: unset;
+  }
+
+  .topbar {
+    gap: 10px;
+  }
+
+  .board-search {
+    order: 10;
+    flex-basis: 100%;
+    max-width: none;
+  }
+
+  .filter-row {
+    justify-content: flex-start;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

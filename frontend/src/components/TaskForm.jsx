@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { STATUS } from "../data/statuses";
+import { USERS } from "../data/users";
 import { todayString } from "../utils/dates";
 
 const TaskForm = ({ onAddTask }) => {
@@ -29,7 +30,7 @@ const TaskForm = ({ onAddTask }) => {
       type,
       severity: type === "bug" ? "major" : null,
       tag: null,
-      assignee: assignee.trim() || "Unassigned",
+      assignee: assignee || "Unassigned",
       dueDate,
       status: STATUS.TODO,
     });
@@ -71,12 +72,18 @@ const TaskForm = ({ onAddTask }) => {
 
         <div className="form-field">
           <label htmlFor="task-assignee">Assignee</label>
-          <input
+          <select
             id="task-assignee"
-            type="text"
             value={assignee}
             onChange={(e) => setAssignee(e.target.value)}
-          />
+          >
+            <option value="">Unassigned</option>
+            {USERS.map((u) => (
+              <option key={u} value={u}>
+                {u}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="form-field">

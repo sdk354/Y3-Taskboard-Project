@@ -42,7 +42,7 @@ export async function deleteTask(taskId) {
   write(read().filter((t) => t.id !== taskId));
 }
 
-export async function updateTaskStatus(taskId, status) {
+export async function updateTask(taskId, changes) {
   await delay(WRITE_DELAY_MS);
-  write(read().map((t) => (t.id === taskId ? { ...t, status } : t)));
+  write(read().map((t) => (t.id === taskId ? { ...t, ...changes } : t)));
 }
