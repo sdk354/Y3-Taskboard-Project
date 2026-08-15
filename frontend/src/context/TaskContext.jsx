@@ -1,51 +1,69 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { initialTasks } from "../data/mockTasks";
+import * as api from "../api/tasks";
 import { STATUSES } from "../data/statuses";
 import { TaskContext } from "../hooks/useTasks";
 
-const STORAGE_KEY = "taskboard-tasks";
-
-const loadTasks = () => {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    return saved ? JSON.parse(saved) : initialTasks;
-  } catch {
-    return initialTasks;
-  }
-};
-
 export const TaskProvider = ({ children }) => {
-  const [tasks, setTasks] = useState(loadTasks);
+  const [tasks, setTasks] = useState([]);
+  // loading | error | success
+  const [status, setStatus] = useState("loading");
+  const [error, setError] = useState(null);
 
-  // Persist tasks so /tasks/:id links to user-created tasks
-  // survive a page refresh (state used to live only in memory)
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
-  }, [tasks]);
-
-  const addTask = useCallback((newTask) => {
-    setTasks((prevTasks) => [...prevTasks, newTask]);
+  const reload = useCallback(async () => {
+    setStatus("loading");
+    setError(null);
+    try {
+      const data = await api.fetchTasks();
+      setTasks(data);
+      setStatus("success");
+    } catch (err) {
+      setError(err.message);
+      setStatus("error");
+    }
   }, []);
 
+  useEffect(() => {
+    reload();
+  }, [reload]);
+
+  const addTask = useCallback(
+    (newTask) => {
+      // next BUG-/TASK- number
+      const numbers = tasks.map(
+        (t) => Number((t.key || "").split("-")[1]) || 0,
+      );
+      const nextNumber = Math.max(100, ...numbers) + 1;
+      const task = {
+        ...newTask,
+        key: `${newTask.type === "bug" ? "BUG" : "TASK"}-${nextNumber}`,
+      };
+
+      setTasks((prev) => [...prev, task]);
+      api.createTask(task);
+    },
+    [tasks],
+  );
+
   const deleteTask = useCallback((taskId) => {
-    setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
+    setTasks((prev) => prev.filter((task) => task.id !== taskId));
+    api.deleteTask(taskId);
   }, []);
 
   const moveTask = useCallback((taskId, newStatus) => {
-    // Ignore anything that isn't a known status so a bad caller
-    // can't strand a task outside every column
+    // don't let a typo'd status strand a task outside every column
     if (!STATUSES.includes(newStatus)) return;
 
-    setTasks((prevTasks) =>
-      prevTasks.map((task) =>
+    setTasks((prev) =>
+      prev.map((task) =>
         task.id === taskId ? { ...task, status: newStatus } : task,
       ),
     );
+    api.updateTaskStatus(taskId, newStatus);
   }, []);
 
   const value = useMemo(
-    () => ({ tasks, addTask, deleteTask, moveTask }),
-    [tasks, addTask, deleteTask, moveTask],
+    () => ({ tasks, status, error, reload, addTask, deleteTask, moveTask }),
+    [tasks, status, error, reload, addTask, deleteTask, moveTask],
   );
 
   return <TaskContext.Provider value={value}>{children}</TaskContext.Provider>;
