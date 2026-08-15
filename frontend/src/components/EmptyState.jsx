@@ -2,7 +2,7 @@ import React from "react";
 
 const EmptyState = ({ message }) => {
   return (
-    <div style={{ padding: "20px", textAlign: "center", color: "var(--text)" }}>
+    <div className="board-state">
       <p>{message}</p>
     </div>
   );

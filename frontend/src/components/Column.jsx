@@ -1,27 +1,48 @@
-import React from "react";
+import React, { useRef, useState } from "react";
 import TaskCard from "./TaskCard";
+import { STATUS } from "../data/statuses";
+
+const LABEL_CLASS = {
+  [STATUS.TODO]: "label-todo",
+  [STATUS.IN_PROGRESS]: "label-inprogress",
+  [STATUS.DONE]: "label-done",
+};
 
 const Column = ({ title, tasks, onDeleteTask, onMoveTask }) => {
+  const [dragOver, setDragOver] = useState(false);
+  // dragenter/leave also fire for children, so count the depth
+  const depth = useRef(0);
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    depth.current = 0;
+    setDragOver(false);
+    const id = e.dataTransfer.getData("text/plain");
+    if (id) onMoveTask(id, title);
+  };
+
   return (
-    <div
-      style={{
-        flex: 1,
-        backgroundColor: "#f4f5f7",
-        padding: "15px",
-        borderRadius: "8px",
-        minHeight: "500px",
+    <section
+      className={dragOver ? "column drag-over" : "column"}
+      onDragEnter={() => {
+        depth.current += 1;
+        setDragOver(true);
       }}
+      onDragLeave={() => {
+        depth.current -= 1;
+        if (depth.current === 0) setDragOver(false);
+      }}
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={handleDrop}
     >
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          marginBottom: "15px",
-          fontWeight: "bold",
-        }}
-      >
-        <h2>{title}</h2>
-        <span>{tasks.length}</span>
+      <div className="column-header">
+        <span className={`column-label ${LABEL_CLASS[title] || ""}`}>
+          {title}
+        </span>
+        <span className="column-count">({tasks.length})</span>
+        <span className="column-icon" aria-hidden="true">
+          {title === STATUS.DONE ? "✓" : "~"}
+        </span>
       </div>
       <div>
         {tasks.map((task) => (
@@ -33,7 +54,7 @@ const Column = ({ title, tasks, onDeleteTask, onMoveTask }) => {
           />
         ))}
       </div>
-    </div>
+    </section>
   );
 };
 
