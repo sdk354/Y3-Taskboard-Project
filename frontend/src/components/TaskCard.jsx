@@ -43,7 +43,14 @@ const TaskCard = ({ task, onDeleteTask = () => {}, onMoveTask = () => {} }) => {
   };
 
   return (
-    <div className={`task-note ${noteClass(task)}`}>
+    <div
+      className={`task-note ${noteClass(task)}`}
+      draggable
+      onDragStart={(e) => {
+        e.dataTransfer.setData("text/plain", task.id);
+        e.dataTransfer.effectAllowed = "move";
+      }}
+    >
       {done && (
         <span className="note-check" aria-hidden="true">
           ✓

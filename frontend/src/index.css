@@ -257,7 +257,14 @@ select:focus {
   border-radius: 16px;
   padding: 18px 16px;
   min-height: 520px;
-  transition: border-color 0.3s ease;
+  transition:
+    border-color 0.3s ease,
+    background-color 0.2s ease;
+}
+
+.column.drag-over {
+  border-color: var(--accent);
+  background: rgba(47, 95, 224, 0.07);
 }
 
 .column-header {
@@ -268,10 +275,12 @@ select:focus {
 }
 
 .column-label {
+  display: inline-flex;
+  align-items: center;
   font-family: "Kalam", cursive;
   font-size: 22px;
-  line-height: 1.2;
-  padding: 2px 10px 4px;
+  line-height: 1;
+  padding: 7px 10px 3px;
   border-radius: 6px;
   transform: rotate(-1.5deg);
   color: #1d1d20;
@@ -311,6 +320,7 @@ select:focus {
   box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.18);
   color: #1d1d20;
   font-family: "Kalam", cursive;
+  cursor: grab;
   transform: rotate(var(--tilt));
   transition:
     transform 0.2s ease,

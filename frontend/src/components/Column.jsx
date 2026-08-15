@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useState } from "react";
 import TaskCard from "./TaskCard";
 import { STATUS } from "../data/statuses";
 
@@ -9,8 +9,32 @@ const LABEL_CLASS = {
 };
 
 const Column = ({ title, tasks, onDeleteTask, onMoveTask }) => {
+  const [dragOver, setDragOver] = useState(false);
+  // dragenter/leave also fire for children, so count the depth
+  const depth = useRef(0);
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    depth.current = 0;
+    setDragOver(false);
+    const id = e.dataTransfer.getData("text/plain");
+    if (id) onMoveTask(id, title);
+  };
+
   return (
-    <section className="column">
+    <section
+      className={dragOver ? "column drag-over" : "column"}
+      onDragEnter={() => {
+        depth.current += 1;
+        setDragOver(true);
+      }}
+      onDragLeave={() => {
+        depth.current -= 1;
+        if (depth.current === 0) setDragOver(false);
+      }}
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={handleDrop}
+    >
       <div className="column-header">
         <span className={`column-label ${LABEL_CLASS[title] || ""}`}>
           {title}
