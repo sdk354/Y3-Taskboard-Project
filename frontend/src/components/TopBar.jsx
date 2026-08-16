@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useSearchParams } from "react-router-dom";
 import { USERS } from "../data/users";
 import { useTheme } from "../hooks/useTheme";
@@ -13,29 +13,6 @@ const TopBar = ({ onNewTask }) => {
   const { theme, toggleTheme } = useTheme();
   const [searchParams, setSearchParams] = useSearchParams();
   const view = searchParams.get("view") || "all";
-  const [hidden, setHidden] = useState(false);
-
-  // duck out of the way when scrolling down. only comes back after a
-  // decent upward scroll (or near the top), so it doesn't flicker in
-  // on tiny wobbles
-  useEffect(() => {
-    let last = window.scrollY;
-    let climbed = 0;
-    const onScroll = () => {
-      const y = window.scrollY;
-      const delta = y - last;
-      if (delta > 0) {
-        climbed = 0;
-        if (y > 80) setHidden(true);
-      } else {
-        climbed -= delta;
-        if (climbed > 120 || y < 80) setHidden(false);
-      }
-      last = y;
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   const setParam = (key, value) => {
     const next = Object.fromEntries(searchParams);
@@ -48,7 +25,7 @@ const TopBar = ({ onNewTask }) => {
   };
 
   return (
-    <header className={hidden ? "topbar topbar-hidden" : "topbar"}>
+    <header className="topbar">
       <span className="logo">bugboard</span>
 
       <div className="topbar-center">
