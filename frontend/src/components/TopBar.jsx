@@ -15,12 +15,22 @@ const TopBar = ({ onNewTask }) => {
   const view = searchParams.get("view") || "all";
   const [hidden, setHidden] = useState(false);
 
-  // duck out of the way when scrolling down, come back on scroll up
+  // duck out of the way when scrolling down. only comes back after a
+  // decent upward scroll (or near the top), so it doesn't flicker in
+  // on tiny wobbles
   useEffect(() => {
     let last = window.scrollY;
+    let climbed = 0;
     const onScroll = () => {
       const y = window.scrollY;
-      setHidden(y > 80 && y > last);
+      const delta = y - last;
+      if (delta > 0) {
+        climbed = 0;
+        if (y > 80) setHidden(true);
+      } else {
+        climbed -= delta;
+        if (climbed > 120 || y < 80) setHidden(false);
+      }
       last = y;
     };
     window.addEventListener("scroll", onScroll, { passive: true });
