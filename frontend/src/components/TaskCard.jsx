@@ -75,6 +75,11 @@ const TaskCard = ({ task, onDeleteTask = () => {}, onMoveTask = () => {} }) => {
             {initials(task.assignee)}
           </span>
           <span className={overdue ? "note-due overdue" : "note-due"}>
+            {done && (
+              <span className="note-due-check" aria-hidden="true">
+                {"✓ "}
+              </span>
+            )}
             {done
               ? `closed ${formatShortDate(task.dueDate)}`
               : `due ${formatShortDate(task.dueDate)}`}
