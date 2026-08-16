@@ -1064,6 +1064,9 @@ select:focus {
   }
 
   .dropdown-option {
+    display: flex;
+    align-items: center;
+    width: 100%;
     padding: 13px 4px;
     border-radius: 0;
     border-top: 1px solid rgba(127, 127, 127, 0.25);
@@ -1072,6 +1075,21 @@ select:focus {
 
   .dropdown-menu li:first-child .dropdown-option {
     border-top: none;
+  }
+
+  /* the yellow bar looks fine in a small menu, at sheet width it's a
+     slab — just bold the picked one and tick it */
+  .dropdown-option.selected {
+    background: none;
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  .dropdown-option.selected::after {
+    content: "✓";
+    margin-left: auto;
+    color: var(--accent);
+    font-size: 17px;
   }
 
   /* vertical pans scroll the page, horizontal ones belong to the
