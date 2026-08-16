@@ -68,8 +68,10 @@ const BoardPage = () => {
       });
       setActiveColumn(el.children[best]?.dataset.status);
     };
-    // sync right away too — changing the status filter swaps the
-    // columns without any scroll event, which left a stale highlight
+    // changing the filter can leave the board scrolled past the only
+    // column that's left, clipping it — snap back to the start
+    el.scrollTo({ left: 0 });
+    // and sync right away, the swap doesn't fire a scroll event
     onScroll();
     el.addEventListener("scroll", onScroll, { passive: true });
     return () => el.removeEventListener("scroll", onScroll);

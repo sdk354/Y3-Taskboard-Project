@@ -578,6 +578,13 @@ select:focus {
   color: #3c3c40;
 }
 
+/* phone-only inline tick next to "closed", desktop keeps the corner one */
+.note-due-check {
+  display: none;
+  color: #1f7a3f;
+  font-weight: 700;
+}
+
 .note-due.overdue {
   color: #d02b2b;
   font-weight: 700;
@@ -1021,10 +1028,19 @@ select:focus {
     line-height: 1;
   }
 
-  /* the ⋯ lives top-right on phones, scoot the done tick out of its way */
+  /* the corner tick clashed with the ⋯ up there, show it inline
+     next to the closed date instead */
   .note-check {
-    right: 42px;
-    top: 8px;
+    display: none;
+  }
+
+  .note-due-check {
+    display: inline;
+  }
+
+  /* a lone filtered column sits centered, not hugging the left */
+  .column:only-child {
+    margin: 0 auto;
   }
 
   /* vertical pans scroll the page, horizontal ones belong to the
