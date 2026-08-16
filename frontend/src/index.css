@@ -290,7 +290,8 @@ select:focus {
   border: 2px solid var(--outline);
   border-radius: 10px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-  z-index: 20;
+  /* above the sticky pager chips and the fab */
+  z-index: 45;
   animation: fade-up 0.15s ease;
 }
 
@@ -885,6 +886,7 @@ select:focus {
   display: flex;
   align-items: center;
   gap: 14px;
+  max-width: min(440px, calc(100vw - 32px));
   padding: 12px 18px;
   border: 2px solid var(--outline);
   border-radius: 12px;
@@ -895,7 +897,17 @@ select:focus {
   z-index: 50;
 }
 
+/* long task titles get cut with an ellipsis instead of wrapping */
+.toast-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .toast button {
+  flex-shrink: 0;
   border: none;
   background: none;
   color: var(--accent);
@@ -975,6 +987,7 @@ select:focus {
   .board-columns {
     gap: 14px;
     scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
   }
 
   .column {
@@ -999,6 +1012,12 @@ select:focus {
     color: #1d1d20;
     padding: 0 4px;
     line-height: 1;
+  }
+
+  /* the ⋯ lives top-right on phones, scoot the done tick out of its way */
+  .note-check {
+    right: 42px;
+    top: 8px;
   }
 
   /* vertical pans scroll the page, horizontal ones belong to the
@@ -1148,8 +1167,7 @@ select:focus {
   }
 
   .toast {
-    max-width: calc(100vw - 32px);
-    white-space: normal;
+    width: calc(100vw - 32px);
   }
 
   .detail-page {

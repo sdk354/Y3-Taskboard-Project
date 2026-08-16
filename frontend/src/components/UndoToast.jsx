@@ -8,7 +8,7 @@ const UndoToast = () => {
 
   return (
     <div className="toast" role="status">
-      <span>Deleted "{lastDeleted.task.title}"</span>
+      <span className="toast-text">Deleted "{lastDeleted.task.title}"</span>
       <button onClick={undoDelete}>Undo</button>
     </div>
   );
