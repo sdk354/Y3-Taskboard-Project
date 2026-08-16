@@ -951,6 +951,13 @@ select:focus {
 
 /* phones: one column at a time, swipe between them */
 @media (max-width: 700px) {
+  /* ios zooms into any focused input under 16px, so never go under */
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+
   .topbar {
     padding: 12px 16px;
   }
