@@ -1063,9 +1063,9 @@ select:focus {
     padding-top: 10px;
   }
 
-  /* all four chips share the width so there's no sideways scrolling */
+  /* chips share the width, longer labels get proportionally more */
   .pager-chip {
-    flex: 1;
+    flex: 1 1 auto;
     min-width: 0;
     display: flex;
     align-items: center;
