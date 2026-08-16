@@ -33,7 +33,6 @@ export function useSwipeActions(ref, actions) {
       sy = e.touches[0].clientY;
       locked = null;
       dx = 0;
-      el.style.transition = "";
     };
 
     const onMove = (e) => {
@@ -44,13 +43,22 @@ export function useSwipeActions(ref, actions) {
       const dy = t.clientY - sy;
 
       if (!locked) {
-        if (Math.abs(dx) > 14 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+        if (Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy) * 1.2) {
+          // if the browser already claimed the gesture for scrolling,
+          // the events can't be cancelled and fighting them jitters
+          if (!e.cancelable) {
+            locked = "v";
+            return;
+          }
           locked = "h";
-        } else if (Math.abs(dy) > 14) {
+          // kill the hover transition so the card tracks the finger
+          // instead of easing 200ms behind it
+          el.style.transition = "none";
+        } else if (Math.abs(dy) > 8) {
           locked = "v";
         }
       }
-      if (locked !== "h") return;
+      if (locked !== "h" || !e.cancelable) return;
 
       e.preventDefault();
       el.style.transform = `translateX(${dx}px) rotate(${dx / 60}deg)`;
