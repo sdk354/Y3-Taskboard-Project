@@ -9,6 +9,9 @@ export const ThemeProvider = ({ children }) => {
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
     localStorage.setItem("taskboard-theme", theme);
+    // keeps the phone status bar the same colour as the page
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.content = theme === "dark" ? "#161619" : "#f2efe9";
   }, [theme]);
 
   const value = useMemo(

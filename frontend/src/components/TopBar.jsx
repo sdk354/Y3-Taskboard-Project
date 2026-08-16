@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { USERS } from "../data/users";
 import { useTheme } from "../hooks/useTheme";
@@ -13,6 +13,19 @@ const TopBar = ({ onNewTask }) => {
   const { theme, toggleTheme } = useTheme();
   const [searchParams, setSearchParams] = useSearchParams();
   const view = searchParams.get("view") || "all";
+  const [hidden, setHidden] = useState(false);
+
+  // duck out of the way when scrolling down, come back on scroll up
+  useEffect(() => {
+    let last = window.scrollY;
+    const onScroll = () => {
+      const y = window.scrollY;
+      setHidden(y > 80 && y > last);
+      last = y;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const setParam = (key, value) => {
     const next = Object.fromEntries(searchParams);
@@ -25,7 +38,7 @@ const TopBar = ({ onNewTask }) => {
   };
 
   return (
-    <header className="topbar">
+    <header className={hidden ? "topbar topbar-hidden" : "topbar"}>
       <span className="logo">bugboard</span>
 
       <div className="topbar-center">

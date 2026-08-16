@@ -9,6 +9,13 @@ export const noteClass = (task) => {
   return "note-blue";
 };
 
+export const LABEL_CLASS = {
+  [STATUS.TODO]: "label-todo",
+  [STATUS.IN_PROGRESS]: "label-inprogress",
+  [STATUS.IN_REVIEW]: "label-inreview",
+  [STATUS.DONE]: "label-done",
+};
+
 export const typeChip = (task) => {
   if (task.type !== "bug") return { label: "TASK", className: "chip-task" };
   if (task.status === STATUS.DONE)

@@ -23,11 +23,12 @@ export function useTouchDrag(ref, onDrop) {
 
     const board = () => document.querySelector(".board-columns");
 
-    const columnUnder = (x, y) => {
+    // columns and the pager chips both carry data-status and accept drops
+    const targetUnder = (x, y) => {
       ghost.style.display = "none";
       const hit = document.elementFromPoint(x, y);
       ghost.style.display = "";
-      return hit ? hit.closest(".column") : null;
+      return hit ? hit.closest("[data-status]") : null;
     };
 
     const scrollLoop = () => {
@@ -54,7 +55,7 @@ export function useTouchDrag(ref, onDrop) {
       const w = ghost.offsetWidth;
       ghost.style.transform = `translate(${touch.clientX - w / 2}px, ${touch.clientY - 30}px) rotate(2deg)`;
 
-      const col = columnUnder(touch.clientX, touch.clientY);
+      const col = targetUnder(touch.clientX, touch.clientY);
       if (col !== lastCol) {
         lastCol?.classList.remove("drag-over");
         col?.classList.add("drag-over");
@@ -109,7 +110,7 @@ export function useTouchDrag(ref, onDrop) {
         return;
       }
       const t = e.changedTouches[0];
-      const col = columnUnder(t.clientX, t.clientY);
+      const col = targetUnder(t.clientX, t.clientY);
       const status = col?.dataset.status;
       cleanup();
       if (status) onDropRef.current(status);

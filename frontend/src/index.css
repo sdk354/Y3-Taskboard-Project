@@ -666,6 +666,15 @@ select:focus {
   color: var(--ink);
 }
 
+/* phone-only chrome, hidden on desktop */
+.column-pager,
+.fab,
+.sheet-backdrop,
+.card-sheet,
+.note-more {
+  display: none;
+}
+
 /* loading / error / empty */
 .board-state {
   padding: 60px 20px;
@@ -912,6 +921,22 @@ select:focus {
 @media (max-width: 700px) {
   .topbar {
     padding: 12px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: var(--bg);
+    transition:
+      transform 0.25s ease,
+      background-color 0.3s ease;
+  }
+
+  .topbar-hidden {
+    transform: translateY(-100%);
+  }
+
+  /* the + new task button moves into the fab down bottom */
+  .topbar .new-task-btn {
+    display: none;
   }
 
   /* row 1: logo + controls, row 2: search and pills */
@@ -950,11 +975,151 @@ select:focus {
     scroll-snap-align: center;
   }
 
-  /* touch drag doesn't exist for html5 dnd, so the move buttons are
-     the mobile way — give them real tap targets */
-  .note-actions button {
-    padding: 6px 10px;
-    font-size: 12px;
+  /* card actions live in the ⋯ sheet on phones */
+  .note-actions {
+    display: none;
+  }
+
+  .note-more {
+    display: inline-flex;
+    margin-left: auto;
+    border: none;
+    background: none;
+    font-size: 20px;
+    font-weight: 700;
+    color: #1d1d20;
+    padding: 0 4px;
+    line-height: 1;
+  }
+
+  /* vertical pans scroll the page, horizontal ones belong to the
+     card swipe actions — column switching happens via the pager */
+  .task-note {
+    touch-action: pan-y;
+  }
+
+  .task-note.swiping-right {
+    outline: 3px solid rgba(44, 122, 61, 0.6);
+  }
+
+  .task-note.swiping-left {
+    outline: 3px solid rgba(214, 69, 69, 0.6);
+  }
+
+  /* sticky mini column labels: tap to jump, drop target while dragging */
+  .column-pager {
+    display: flex;
+    gap: 8px;
+    position: sticky;
+    top: 8px;
+    z-index: 25;
+    margin-bottom: 12px;
+    overflow-x: auto;
+    padding: 4px 2px;
+  }
+
+  .pager-chip {
+    font-family: "Kalam", cursive;
+    font-size: 15px;
+    line-height: 1;
+    padding: 8px 10px 6px;
+    border: none;
+    border-radius: 6px;
+    color: #1d1d20;
+    opacity: 0.55;
+    white-space: nowrap;
+    transform: rotate(-1deg);
+  }
+
+  .pager-chip.active {
+    opacity: 1;
+    outline: 2px solid var(--outline);
+  }
+
+  .pager-chip.drag-over {
+    opacity: 1;
+    outline: 2px dashed var(--accent);
+  }
+
+  .fab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    right: 20px;
+    bottom: 24px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 2px solid #1c3ea8;
+    background: var(--accent);
+    color: #fff;
+    font-size: 30px;
+    line-height: 1;
+    box-shadow: 0 6px 16px rgba(47, 95, 224, 0.45);
+    z-index: 40;
+  }
+
+  .sheet-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 50;
+    animation: fade-in 0.2s ease;
+  }
+
+  /* the new-task form becomes a bottom sheet */
+  .task-form {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: 0;
+    z-index: 60;
+    border-radius: 16px 16px 0 0;
+    border-bottom: none;
+    max-height: 80vh;
+    overflow-y: auto;
+    animation: sheet-up 0.25s ease;
+  }
+
+  .card-sheet {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 60;
+    background: var(--surface);
+    border: 2px solid var(--outline);
+    border-bottom: none;
+    border-radius: 16px 16px 0 0;
+    padding: 10px 16px 24px;
+    animation: sheet-up 0.2s ease;
+  }
+
+  .sheet-title {
+    font-family: "Kalam", cursive;
+    font-size: 18px;
+    margin: 6px 0 10px;
+  }
+
+  .sheet-option {
+    text-align: left;
+    padding: 13px 4px;
+    border: none;
+    border-top: 1px solid rgba(127, 127, 127, 0.25);
+    background: none;
+    color: var(--ink);
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .sheet-option.danger {
+    color: #d64545;
   }
 
   .task-form-fields {
@@ -973,6 +1138,18 @@ select:focus {
 
   .detail-note {
     padding: 28px 18px 18px;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(100%);
   }
 }
 
