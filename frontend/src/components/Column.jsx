@@ -25,6 +25,7 @@ const Column = ({ title, tasks, onDeleteTask, onMoveTask }) => {
   return (
     <section
       className={dragOver ? "column drag-over" : "column"}
+      data-status={title}
       onDragEnter={() => {
         depth.current += 1;
         setDragOver(true);

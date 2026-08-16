@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useRef } from "react";
 import { Link } from "react-router-dom";
 import { STATUS, STATUSES } from "../data/statuses";
 import { formatShortDate, isOverdue } from "../utils/dates";
 import { noteClass, typeChip } from "../utils/noteStyle";
+import { useTouchDrag } from "../hooks/useTouchDrag";
 
 const initials = (name = "?") =>
   name.length <= 2
@@ -19,11 +20,15 @@ const TaskCard = ({ task, onDeleteTask = () => {}, onMoveTask = () => {} }) => {
   const overdue = isOverdue(task);
   const chip = typeChip(task);
 
+  const noteRef = useRef(null);
+  useTouchDrag(noteRef, (status) => onMoveTask(task.id, status));
+
   // no confirm dialog, the undo toast covers mistakes
   const handleDelete = () => onDeleteTask(task.id);
 
   return (
     <div
+      ref={noteRef}
       className={`task-note ${noteClass(task)}`}
       draggable
       onDragStart={(e) => {
