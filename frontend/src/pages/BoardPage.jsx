@@ -68,9 +68,12 @@ const BoardPage = () => {
       });
       setActiveColumn(el.children[best]?.dataset.status);
     };
+    // sync right away too — changing the status filter swaps the
+    // columns without any scroll event, which left a stale highlight
+    onScroll();
     el.addEventListener("scroll", onScroll, { passive: true });
     return () => el.removeEventListener("scroll", onScroll);
-  }, [status]);
+  }, [status, filters.status]);
 
   // scroll the board sideways only — scrollIntoView also corrects
   // vertically by however much the column overflows, which felt random
