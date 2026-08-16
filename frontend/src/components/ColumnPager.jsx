@@ -4,10 +4,16 @@ import { LABEL_CLASS } from "../utils/noteStyle";
 
 // phone-only strip of mini column labels: tap to jump, syncs while
 // swiping, and doubles as a drop target when dragging a card
-const ColumnPager = ({ counts, active, onJump, onDropTask }) => {
+const ColumnPager = ({
+  statuses = STATUSES,
+  counts,
+  active,
+  onJump,
+  onDropTask,
+}) => {
   return (
     <div className="column-pager" role="tablist" aria-label="Columns">
-      {STATUSES.map((s) => (
+      {statuses.map((s) => (
         <button
           key={s}
           role="tab"

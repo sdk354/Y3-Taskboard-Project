@@ -3,7 +3,7 @@ import { STATUS } from "../data/statuses";
 import { USERS } from "../data/users";
 import { todayString } from "../utils/dates";
 
-const TaskForm = ({ onAddTask }) => {
+const TaskForm = ({ onAddTask, onClose }) => {
   const [title, setTitle] = useState("");
   const [type, setType] = useState("task");
   const [assignee, setAssignee] = useState("");
@@ -44,7 +44,19 @@ const TaskForm = ({ onAddTask }) => {
 
   return (
     <div className="card task-form">
-      <h3>Add a New Task</h3>
+      <div className="task-form-head">
+        <h3>Add a New Task</h3>
+        {onClose && (
+          <button
+            type="button"
+            className="form-close"
+            aria-label="Close"
+            onClick={onClose}
+          >
+            ×
+          </button>
+        )}
+      </div>
       {error && <p className="form-error">{error}</p>}
 
       <form onSubmit={handleSubmit} className="task-form-fields">
