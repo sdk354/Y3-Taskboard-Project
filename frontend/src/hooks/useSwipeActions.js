@@ -29,6 +29,12 @@ export function useSwipeActions(ref, actions) {
 
     const onStart = (e) => {
       if (e.touches.length !== 1) return;
+      // ios skips touchcancel when a system gesture (edge swipe,
+      // notification pull) hijacks the touch, which left the card
+      // stuck part-slid — clear any leftovers before a new gesture
+      el.style.transition = "";
+      el.style.transform = "";
+      el.classList.remove("swiping-left", "swiping-right");
       sx = e.touches[0].clientX;
       sy = e.touches[0].clientY;
       locked = null;
@@ -38,6 +44,11 @@ export function useSwipeActions(ref, actions) {
     const onMove = (e) => {
       // the long-press drag owns the gesture once the card is lifted
       if (el.classList.contains("touch-lifted")) return;
+      // a second finger means pinch/system stuff, walk away cleanly
+      if (e.touches.length !== 1) {
+        reset();
+        return;
+      }
       const t = e.touches[0];
       dx = t.clientX - sx;
       const dy = t.clientY - sy;
