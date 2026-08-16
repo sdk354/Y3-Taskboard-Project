@@ -2,7 +2,7 @@ import React, { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { STATUS, STATUSES } from "../data/statuses";
 import { formatShortDate, isOverdue } from "../utils/dates";
-import { noteClass, typeChip } from "../utils/noteStyle";
+import { noteClass, typeChip, LABEL_CLASS } from "../utils/noteStyle";
 import { useTouchDrag } from "../hooks/useTouchDrag";
 import { useSwipeActions } from "../hooks/useSwipeActions";
 
@@ -114,10 +114,17 @@ const TaskCard = ({ task, onDeleteTask = () => {}, onMoveTask = () => {} }) => {
                   setSheetOpen(false);
                 }}
               >
-                Move to {s}
+                <span className="sheet-icon" aria-hidden="true">
+                  →
+                </span>
+                Move to
+                <span className={`sheet-chip ${LABEL_CLASS[s]}`}>{s}</span>
               </button>
             ))}
-            <Link className="sheet-option" to={`/tasks/${task.id}`}>
+            <Link className="sheet-option edit" to={`/tasks/${task.id}`}>
+              <span className="sheet-icon" aria-hidden="true">
+                ✎
+              </span>
               Open / Edit
             </Link>
             <button
@@ -127,6 +134,9 @@ const TaskCard = ({ task, onDeleteTask = () => {}, onMoveTask = () => {} }) => {
                 handleDelete();
               }}
             >
+              <span className="sheet-icon" aria-hidden="true">
+                ✕
+              </span>
               Delete
             </button>
           </div>
