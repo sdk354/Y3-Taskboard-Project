@@ -61,9 +61,14 @@ export function useSwipeActions(ref, actions) {
       if (locked !== "h" || !e.cancelable) return;
 
       e.preventDefault();
-      el.style.transform = `translateX(${dx}px) rotate(${dx / 60}deg)`;
-      el.classList.toggle("swiping-right", dx > 40);
-      el.classList.toggle("swiping-left", dx < -40);
+      const { onSwipeRight, onSwipeLeft } = actionsRef.current;
+      // no action that way? rubber-band instead of promising something
+      let shown = dx;
+      if (dx > 0 && !onSwipeRight) shown = Math.min(dx * 0.15, 24);
+      if (dx < 0 && !onSwipeLeft) shown = Math.max(dx * 0.15, -24);
+      el.style.transform = `translateX(${shown}px) rotate(${shown / 60}deg)`;
+      el.classList.toggle("swiping-right", dx > 40 && Boolean(onSwipeRight));
+      el.classList.toggle("swiping-left", dx < -40 && Boolean(onSwipeLeft));
     };
 
     const onEnd = () => {
