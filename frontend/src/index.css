@@ -627,10 +627,30 @@ select:focus {
   animation: fade-up 0.25s ease;
 }
 
+.task-form-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
 .task-form h3 {
   margin-top: 0;
   font-family: "Kalam", cursive;
   font-size: 21px;
+}
+
+.form-close {
+  border: none;
+  background: none;
+  font-size: 24px;
+  line-height: 1;
+  color: var(--muted);
+  padding: 0 2px;
+}
+
+.form-close:hover {
+  color: var(--ink);
+  transform: none;
 }
 
 .task-form-fields {
@@ -1006,16 +1026,27 @@ select:focus {
     outline: 3px solid rgba(214, 69, 69, 0.6);
   }
 
-  /* sticky mini column labels: tap to jump, drop target while dragging */
+  /* sticky mini column labels: tap to jump, drop target while dragging.
+     solid background so columns scrolling under it don't show through */
   .column-pager {
     display: flex;
     gap: 8px;
     position: sticky;
-    top: 8px;
+    top: 0;
     z-index: 25;
-    margin-bottom: 12px;
+    margin: 0 -16px 12px;
     overflow-x: auto;
-    padding: 4px 2px;
+    padding: 10px 16px;
+    background: var(--bg);
+  }
+
+  /* the pager already names the column and its count */
+  .column-header {
+    display: none;
+  }
+
+  .column {
+    padding-top: 10px;
   }
 
   .pager-chip {

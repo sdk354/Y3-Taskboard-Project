@@ -46,6 +46,9 @@ const BoardPage = () => {
   );
   const assignees = [...new Set(tasks.map((t) => t.assignee))];
 
+  // picking a status in the filter shows just that column
+  const columnsToShow = filters.status ? [filters.status] : STATUSES;
+
   // keep the pager's active chip in sync while swiping columns
   useEffect(() => {
     if (status !== "success") return;
@@ -63,14 +66,14 @@ const BoardPage = () => {
           best = i;
         }
       });
-      setActiveColumn(STATUSES[best]);
+      setActiveColumn(el.children[best]?.dataset.status);
     };
     el.addEventListener("scroll", onScroll, { passive: true });
     return () => el.removeEventListener("scroll", onScroll);
   }, [status]);
 
   const jumpToColumn = (s) => {
-    const col = columnsRef.current?.children[STATUSES.indexOf(s)];
+    const col = columnsRef.current?.children[columnsToShow.indexOf(s)];
     col?.scrollIntoView({
       behavior: "smooth",
       inline: "center",
@@ -98,10 +101,16 @@ const BoardPage = () => {
               onClick={() => setShowForm(false)}
             />
           )}
-          {showForm && <TaskForm onAddTask={handleAddTask} />}
+          {showForm && (
+            <TaskForm
+              onAddTask={handleAddTask}
+              onClose={() => setShowForm(false)}
+            />
+          )}
           <FilterBar assignees={assignees} />
 
           <ColumnPager
+            statuses={columnsToShow}
             counts={counts}
             active={activeColumn}
             onJump={jumpToColumn}
@@ -119,7 +128,7 @@ const BoardPage = () => {
           )}
 
           <div className="board-columns" ref={columnsRef}>
-            {STATUSES.map((s) => (
+            {columnsToShow.map((s) => (
               <Column
                 key={s}
                 title={s}
