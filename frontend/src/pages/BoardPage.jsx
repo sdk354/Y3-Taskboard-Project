@@ -72,12 +72,15 @@ const BoardPage = () => {
     return () => el.removeEventListener("scroll", onScroll);
   }, [status]);
 
+  // scroll the board sideways only — scrollIntoView also corrects
+  // vertically by however much the column overflows, which felt random
   const jumpToColumn = (s) => {
-    const col = columnsRef.current?.children[columnsToShow.indexOf(s)];
-    col?.scrollIntoView({
+    const el = columnsRef.current;
+    const col = el?.children[columnsToShow.indexOf(s)];
+    if (!el || !col) return;
+    el.scrollTo({
+      left: col.offsetLeft - (el.clientWidth - col.offsetWidth) / 2,
       behavior: "smooth",
-      inline: "center",
-      block: "nearest",
     });
   };
 
