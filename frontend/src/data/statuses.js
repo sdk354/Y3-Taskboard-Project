@@ -3,7 +3,13 @@
 export const STATUS = {
   TODO: "To Do",
   IN_PROGRESS: "In Progress",
+  IN_REVIEW: "In Review",
   DONE: "Done",
 };
 
-export const STATUSES = [STATUS.TODO, STATUS.IN_PROGRESS, STATUS.DONE];
+export const STATUSES = [
+  STATUS.TODO,
+  STATUS.IN_PROGRESS,
+  STATUS.IN_REVIEW,
+  STATUS.DONE,
+];

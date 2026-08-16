@@ -366,6 +366,10 @@ select:focus {
   background: #f491b2;
 }
 
+.label-inreview {
+  background: #8ec1f2;
+}
+
 .label-done {
   background: #7fd6a0;
 }
@@ -849,15 +853,15 @@ select:focus {
   text-decoration: underline;
 }
 
-/* small screens: stack the columns */
-@media (max-width: 900px) {
-  .board-columns {
-    flex-direction: column;
+/* tablets: keep columns side by side, let the board scroll sideways */
+@media (max-width: 1100px) {
+  .column {
+    min-width: 230px;
   }
 
-  .column {
-    width: 100%;
-    min-height: unset;
+  .board-columns {
+    overflow-x: auto;
+    padding-bottom: 8px;
   }
 
   .topbar {
@@ -875,6 +879,74 @@ select:focus {
 
   .filter-row {
     justify-content: flex-start;
+  }
+}
+
+/* phones: one column at a time, swipe between them */
+@media (max-width: 700px) {
+  .topbar {
+    padding: 12px 16px;
+  }
+
+  /* row 1: logo + controls, row 2: search and pills */
+  .topbar-right {
+    margin-left: auto;
+  }
+
+  .topbar-center {
+    order: 5;
+    flex-basis: 100%;
+    justify-content: center;
+  }
+
+  .logo {
+    font-size: 24px;
+  }
+
+  /* decorative, and space is tight */
+  .avatars {
+    display: none;
+  }
+
+  .board-main {
+    padding: 0 16px 16px;
+  }
+
+  .board-columns {
+    gap: 14px;
+    scroll-snap-type: x mandatory;
+  }
+
+  .column {
+    flex: 0 0 86%;
+    min-width: 0;
+    min-height: 420px;
+    scroll-snap-align: center;
+  }
+
+  /* touch drag doesn't exist for html5 dnd, so the move buttons are
+     the mobile way — give them real tap targets */
+  .note-actions button {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .task-form-fields {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .toast {
+    max-width: calc(100vw - 32px);
+    white-space: normal;
+  }
+
+  .detail-page {
+    padding: 16px;
+  }
+
+  .detail-note {
+    padding: 28px 18px 18px;
   }
 }
 

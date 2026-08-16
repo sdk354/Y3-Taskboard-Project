@@ -5,6 +5,7 @@ import { STATUS } from "../data/statuses";
 const LABEL_CLASS = {
   [STATUS.TODO]: "label-todo",
   [STATUS.IN_PROGRESS]: "label-inprogress",
+  [STATUS.IN_REVIEW]: "label-inreview",
   [STATUS.DONE]: "label-done",
 };
 

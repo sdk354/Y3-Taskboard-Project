@@ -2,8 +2,8 @@
 
 Group project for the Full Stack Development Workshop (Aug 2026). We're building a
 kanban-style board for tracking dev work and bug reports — create tasks/bug tickets,
-move them between To Do / In Progress / Done, and eventually see teammates' changes
-live.
+move them through To Do / In Progress / In Review / Done, and eventually see
+teammates' changes live.
 
 Built up over 5 weekly sessions, one layer per session:
 
