@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Environment variables
+.env
+
+# Logs
+logs/
+*.log
+
+# Build output
+dist/
+
+# Testing coverage
+coverage/
+
+# OS files
+.DS_Store
+
+# Editor settings
+.vscode/
+
+# Temporary files
+*.tmp
+*.temp

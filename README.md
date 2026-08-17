@@ -67,3 +67,44 @@ touches frontend, backend and testing at some point.
   actually a downgrade, so we're ignoring it.
 - The Vite template ships with oxlint now instead of ESLint. Both are installed
   at the moment — we'll pick one and delete the other.
+
+## Backend (Session 2)
+
+The `backend/` folder contains the Node.js + Express REST API that replaces the frontend mock API layer.
+
+### Backend Stack
+
+- Node.js
+- Express.js
+- MongoDB + Mongoose
+- JWT Authentication
+- bcrypt
+- dotenv
+- CORS
+
+### Backend Structure
+
+```text
+backend/
+  src/
+    config/
+    controllers/
+    models/
+    routes/
+    middleware/
+    services/
+    repositories/
+    utils/
+    app.js
+    server.js
+```
+
+### Running Backend
+
+```bash
+cd backend
+npm install
+npm run dev
+```
+
+The frontend will communicate with the backend API instead of the current mock API layer once the integration is completed.
