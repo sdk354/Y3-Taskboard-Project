@@ -1,12 +1,17 @@
 import tasks from '../utils/mockTasks.js';
 
-const nextIdFor = (prefix) => {
-  const highest = tasks
+const seedCounter = (prefix) =>
+  tasks
     .filter((task) => task.id.startsWith(`${prefix}-`))
     .map((task) => Number(task.id.split('-')[1]))
     .filter((n) => !Number.isNaN(n))
     .reduce((max, n) => Math.max(max, n), 0);
-  return `${prefix}-${highest + 1}`;
+
+const counters = { BUG: seedCounter('BUG'), TASK: seedCounter('TASK') };
+
+const nextIdFor = (prefix) => {
+  counters[prefix] = (counters[prefix] || 0) + 1;
+  return `${prefix}-${counters[prefix]}`;
 };
 
 const taskRepository = {
@@ -18,8 +23,8 @@ const taskRepository = {
     const prefix = taskData.type === 'BUG' ? 'BUG' : 'TASK';
 
     const newTask = {
-      id: nextIdFor(prefix),
       ...taskData,
+      id: nextIdFor(prefix),
       status: taskData.status || 'To Do'
     };
 
@@ -35,7 +40,8 @@ const taskRepository = {
       return null;
     }
 
-    Object.assign(task, updates);
+    const { id: _ignoredId, type: _ignoredType, ...safeUpdates } = updates;
+    Object.assign(task, safeUpdates);
 
     return task;
   },
