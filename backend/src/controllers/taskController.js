@@ -38,7 +38,7 @@ const taskController = {
     const { id } = req.params;
     const updates = req.body;
 
-    const allowedStatuses = ["To Do", "In Progress", "Done"];
+    const allowedStatuses = ["To Do", "In Progress", "In Review", "Done"];
 
     if (updates.status && !allowedStatuses.includes(updates.status)) {
       return res.status(400).json({
