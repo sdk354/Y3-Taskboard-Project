@@ -1,6 +1,13 @@
 import tasks from '../utils/mockTasks.js';
 
-let keyCounter = 102;
+const nextIdFor = (prefix) => {
+  const highest = tasks
+    .filter((task) => task.id.startsWith(`${prefix}-`))
+    .map((task) => Number(task.id.split('-')[1]))
+    .filter((n) => !Number.isNaN(n))
+    .reduce((max, n) => Math.max(max, n), 0);
+  return `${prefix}-${highest + 1}`;
+};
 
 const taskRepository = {
   getAllTasks: () => tasks,
@@ -11,7 +18,7 @@ const taskRepository = {
     const prefix = taskData.type === 'BUG' ? 'BUG' : 'TASK';
 
     const newTask = {
-      id: `${prefix}-${keyCounter++}`,
+      id: nextIdFor(prefix),
       ...taskData,
       status: taskData.status || 'To Do'
     };
