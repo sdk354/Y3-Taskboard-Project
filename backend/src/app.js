@@ -31,7 +31,10 @@ app.use((req, res) => {
 // 500 Server Error Handler
 app.use((err, req, res, next) => {
     console.error(err);
-    res.status(err.status || 500).json({ error: err.message || "server error" });
+    res.status(err.status || 500).json({
+        error: err.message || "server error",
+        ...(err.errors ? { errors: err.errors } : {}),
+    });
 });
 
 export default app;

@@ -9,7 +9,7 @@ export function authenticate(req, res, next) {
     const token = header.split(" ")[1];
     try {
         const payload = verifyToken(token);
-        const user = users.findById(payload.id);
+        const user = users.getUserById(payload.id);
         if (!user) return next(new ForbiddenError());
         req.user = user;
         next();
