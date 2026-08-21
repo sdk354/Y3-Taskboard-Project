@@ -1,48 +1,56 @@
-import { initialTasks } from "../data/mockTasks";
+const API_URL = "http://localhost:4000/api/tasks";
 
-// fake api for now, real backend comes later. data sits in localStorage
-// so it survives refreshes, and every function pretends to be a network call
-const STORAGE_KEY = "taskboard-tasks-v2";
-const FETCH_DELAY_MS = 700;
-const WRITE_DELAY_MS = 250;
-
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-const read = () => {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    return saved ? JSON.parse(saved) : initialTasks;
-  } catch {
-    return initialTasks;
-  }
+const getToken = () => {
+  return localStorage.getItem("token");
 };
 
-const write = (tasks) =>
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+const request = async (url, options = {}) => {
+  const token = getToken();
 
-export async function fetchTasks() {
-  await delay(FETCH_DELAY_MS);
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+      ...options.headers,
+    },
+  });
 
-  // add ?fail to the url to test the error state
-  if (new URLSearchParams(window.location.search).has("fail")) {
-    throw new Error("Could not load the board. The server did not respond.");
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message ||
+        data.error ||
+        "Something went wrong"
+    );
   }
 
-  return read();
+  return data;
+};
+
+export async function fetchTasks() {
+  return request(API_URL, {
+    method: "GET",
+  });
 }
 
 export async function createTask(task) {
-  await delay(WRITE_DELAY_MS);
-  write([...read(), task]);
-  return task;
-}
-
-export async function deleteTask(taskId) {
-  await delay(WRITE_DELAY_MS);
-  write(read().filter((t) => t.id !== taskId));
+  return request(API_URL, {
+    method: "POST",
+    body: JSON.stringify(task),
+  });
 }
 
 export async function updateTask(taskId, changes) {
-  await delay(WRITE_DELAY_MS);
-  write(read().map((t) => (t.id === taskId ? { ...t, ...changes } : t)));
+  return request(`${API_URL}/${taskId}`, {
+    method: "PATCH",
+    body: JSON.stringify(changes),
+  });
+}
+
+export async function deleteTask(taskId) {
+  return request(`${API_URL}/${taskId}`, {
+    method: "DELETE",
+  });
 }

@@ -1,63 +1,75 @@
-import tasks from '../utils/mockTasks.js';
+import tasks from "../utils/mockTasks.js";
 
-const seedCounter = (prefix) =>
-  tasks
-    .filter((task) => task.id.startsWith(`${prefix}-`))
-    .map((task) => Number(task.id.split('-')[1]))
-    .filter((n) => !Number.isNaN(n))
-    .reduce((max, n) => Math.max(max, n), 0);
+let idCounter = tasks.length + 1;
 
-const counters = { BUG: seedCounter('BUG'), TASK: seedCounter('TASK') };
+const getNextKeyNumber = (type) => {
+  const prefix = type === "bug" ? "BUG" : "TASK";
 
-const nextIdFor = (prefix) => {
-  counters[prefix] = (counters[prefix] || 0) + 1;
-  return `${prefix}-${counters[prefix]}`;
+  const numbers = tasks
+    .filter((task) => task.key.startsWith(prefix))
+    .map((task) => Number(task.key.split("-")[1]))
+    .filter((number) => !Number.isNaN(number));
+
+  return Math.max(100, ...numbers) + 1;
 };
 
 const taskRepository = {
   getAllTasks: () => tasks,
 
-  getTaskById: (id) => tasks.find(task => task.id === id),
+  getTaskById: (id) => {
+    return tasks.find((task) => task.id === id);
+  },
 
   createTask: (taskData) => {
-    const prefix = taskData.type === 'BUG' ? 'BUG' : 'TASK';
+    const type = taskData.type || "task";
 
     const newTask = {
-      ...taskData,
-      id: nextIdFor(prefix),
-      status: taskData.status || 'To Do'
+      id: String(idCounter++),
+      key: `${type === "bug" ? "BUG" : "TASK"}-${getNextKeyNumber(type)}`,
+      type,
+      severity: type === "bug" ? taskData.severity || "major" : null,
+      title: taskData.title,
+      assignee: taskData.assignee || "Unassigned",
+      status: taskData.status || "To Do",
+      dueDate: taskData.dueDate || null,
+      tag: taskData.tag || null,
     };
 
     tasks.push(newTask);
     return newTask;
   },
 
-  // Update
   updateTask: (id, updates) => {
-    const task = tasks.find(task => task.id === id);
+    const task = tasks.find((task) => task.id === id);
 
-    if (!task) {
-      return null;
-    }
+    if (!task) return null;
 
-    const { id: _ignoredId, type: _ignoredType, ...safeUpdates } = updates;
-    Object.assign(task, safeUpdates);
+    const allowedFields = [
+      "title",
+      "type",
+      "severity",
+      "assignee",
+      "status",
+      "dueDate",
+      "tag",
+    ];
+
+    allowedFields.forEach((field) => {
+      if (updates[field] !== undefined) {
+        task[field] = updates[field];
+      }
+    });
 
     return task;
   },
 
-  // Delete
   deleteTask: (id) => {
-    const index = tasks.findIndex(task => task.id === id);
+    const index = tasks.findIndex((task) => task.id === id);
 
-    if (index === -1) {
-      return null;
-    }
+    if (index === -1) return null;
 
-    const deletedTask = tasks.splice(index, 1)[0];
-
-    return deletedTask;
-  }
+    return tasks.splice(index, 1)[0];
+  },
 };
 
 export default taskRepository;
