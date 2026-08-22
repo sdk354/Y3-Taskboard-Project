@@ -8,8 +8,10 @@ import React, {
 import * as api from "../api/tasks";
 import { STATUSES } from "../data/statuses";
 import { TaskContext } from "../hooks/useTasks";
+import { useAuth } from "../hooks/useAuth";
 
 export const TaskProvider = ({ children }) => {
+  const { token } = useAuth();
   const [tasks, setTasks] = useState([]);
   // loading | error | success
   const [status, setStatus] = useState("loading");
@@ -31,27 +33,29 @@ export const TaskProvider = ({ children }) => {
     }
   }, []);
 
+  // logging in doesn't remount this provider, so the initial fetch (which
+  // ran with no token) never picks up the board otherwise
   useEffect(() => {
+    if (!token) {
+      setTasks([]);
+      setStatus("loading");
+      setError(null);
+      return;
+    }
     reload();
-  }, [reload]);
+  }, [token, reload]);
 
-  const addTask = useCallback(
-    (newTask) => {
-      // next BUG-/TASK- number
-      const numbers = tasks.map(
-        (t) => Number((t.key || "").split("-")[1]) || 0,
-      );
-      const nextNumber = Math.max(100, ...numbers) + 1;
-      const task = {
-        ...newTask,
-        key: `${newTask.type === "bug" ? "BUG" : "TASK"}-${nextNumber}`,
-      };
-
-      setTasks((prev) => [...prev, task]);
-      api.createTask(task);
-    },
-    [tasks],
-  );
+  const addTask = useCallback(async (newTask) => {
+    // the backend assigns id/key, so wait for its response instead of
+    // guessing one client-side - anything else and drag/edit/delete on
+    // the new card would silently 404 until a refresh
+    try {
+      const created = await api.createTask(newTask);
+      setTasks((prev) => [...prev, created]);
+    } catch (err) {
+      setError(err.message);
+    }
+  }, []);
 
   const deleteTask = useCallback(
     (taskId) => {
@@ -69,18 +73,25 @@ export const TaskProvider = ({ children }) => {
     [tasks],
   );
 
-  const undoDelete = useCallback(() => {
+  const undoDelete = useCallback(async () => {
     if (!lastDeleted) return;
     clearTimeout(undoTimer.current);
 
     const { task, index } = lastDeleted;
-    setTasks((prev) => {
-      const next = [...prev];
-      next.splice(Math.min(index, next.length), 0, task);
-      return next;
-    });
-    api.createTask(task);
     setLastDeleted(null);
+
+    // recreated task gets a new id/key from the server, same reasoning
+    // as addTask - it isn't the same record it was before deletion
+    try {
+      const created = await api.createTask(task);
+      setTasks((prev) => {
+        const next = [...prev];
+        next.splice(Math.min(index, next.length), 0, created);
+        return next;
+      });
+    } catch (err) {
+      setError(err.message);
+    }
   }, [lastDeleted]);
 
   const updateTask = useCallback((taskId, changes) => {

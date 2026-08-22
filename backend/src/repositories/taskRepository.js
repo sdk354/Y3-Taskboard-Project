@@ -1,17 +1,22 @@
 import tasks from "../utils/mockTasks.js";
 
-let idCounter = tasks.length + 1;
-
-const getNextKeyNumber = (type) => {
-  const prefix = type === "bug" ? "BUG" : "TASK";
-
-  const numbers = tasks
-    .filter((task) => task.key.startsWith(prefix))
+const seedKeyCounter = (prefix) =>
+  tasks
+    .filter((task) => task.key.startsWith(`${prefix}-`))
     .map((task) => Number(task.key.split("-")[1]))
-    .filter((number) => !Number.isNaN(number));
+    .filter((n) => !Number.isNaN(n))
+    .reduce((max, n) => Math.max(max, n), 100);
 
-  return Math.max(100, ...numbers) + 1;
+const keyCounters = { BUG: seedKeyCounter("BUG"), TASK: seedKeyCounter("TASK") };
+
+const nextKeyFor = (type) => {
+  const prefix = type === "bug" ? "BUG" : "TASK";
+  keyCounters[prefix] += 1;
+  return `${prefix}-${keyCounters[prefix]}`;
 };
+
+let idCounter =
+  tasks.reduce((max, task) => Math.max(max, Number(task.id) || 0), 0) + 1;
 
 const taskRepository = {
   getAllTasks: () => tasks,
@@ -25,7 +30,7 @@ const taskRepository = {
 
     const newTask = {
       id: String(idCounter++),
-      key: `${type === "bug" ? "BUG" : "TASK"}-${getNextKeyNumber(type)}`,
+      key: nextKeyFor(type),
       type,
       severity: type === "bug" ? taskData.severity || "major" : null,
       title: taskData.title,
@@ -44,6 +49,8 @@ const taskRepository = {
 
     if (!task) return null;
 
+    const previousType = task.type;
+
     const allowedFields = [
       "title",
       "type",
@@ -59,6 +66,11 @@ const taskRepository = {
         task[field] = updates[field];
       }
     });
+
+    if (updates.type && updates.type !== previousType) {
+      task.key = nextKeyFor(updates.type);
+      if (updates.type !== "bug") task.severity = null;
+    }
 
     return task;
   },

@@ -1,4 +1,5 @@
-const API_URL = "http://localhost:4000/api/tasks";
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+const API_URL = `${BASE_URL}/api/tasks`;
 
 const getToken = () => {
   return localStorage.getItem("token");
