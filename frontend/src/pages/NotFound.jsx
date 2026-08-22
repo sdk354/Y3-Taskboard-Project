@@ -6,10 +6,15 @@ function NotFound({
   message = "The page you are looking for does not exist.",
 }) {
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>{title}</h2>
-      <p>{message}</p>
-      <Link to="/">Back to Board</Link>
+    <div className="auth-page">
+      <div className="card auth-card">
+        <span className="logo">bugboard</span>
+        <h2>{title}</h2>
+        <p>{message}</p>
+        <Link to="/" className="new-task-btn">
+          Back to Board
+        </Link>
+      </div>
     </div>
   );
 }

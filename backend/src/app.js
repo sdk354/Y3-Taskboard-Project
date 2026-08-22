@@ -12,13 +12,10 @@ const origins = process.env.CORS_ORIGIN
 app.use(cors({ origin: origins }));
 app.use(express.json());
 
-// ✅ Authentication routes (must be before 404 handler)
 app.use("/api/auth", authRoutes);
 
-// ✅ Task routes
 app.use("/api/tasks", taskRoutes);
 
-// Health check
 app.get("/api/health", (req, res) => {
     res.json({ status: "ok", uptime: Math.round(process.uptime()) });
 });
