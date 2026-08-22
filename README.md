@@ -1,110 +1,248 @@
-# bugboard
+# BugBoard - Full Stack Development Workshop
 
-Group project for the Full Stack Development Workshop (Aug 2026). We're building a
-kanban-style board for tracking dev work and bug reports — create tasks/bug tickets,
-move them through To Do / In Progress / In Review / Done, and eventually see
-teammates' changes live.
+## Project Overview
 
-Built up over 5 weekly sessions, one layer per session:
+BugBoard is a full-stack Kanban-style task and bug tracking application
+developed for the Full Stack Development Workshop (Aug 2026).
 
-| Session | Adds |
-|---------|------|
-| 1 | React frontend with mock data |
-| 2 | Node/Express REST API + JWT auth |
-| 3 | MongoDB (Mongoose) + offline support |
-| 4 | Tests (Jest, RTL, Supertest) + GitHub Actions CI |
-| 5 | Socket.io real-time sync, Docker, deployment |
+The system allows development teams to: - Create tasks and bug reports -
+Move tasks through workflow stages: - To Do - In Progress - In Review -
+Done - Manage task details - Authenticate users securely - Communicate
+between React frontend and Express backend through REST APIs
 
-Session 1 (the frontend) is done — tasks 1 through 6 are merged. The board has
-create/move/delete with undo, drag and drop between columns, search + filters
-that live in the URL, routing with a task detail page (editable), light/dark
-mode, and loading/error/empty states backed by a fake API layer in
-`src/api/tasks.js`. The `server/` folder comes in session 2, at which point the
-fake API gets swapped for real fetch calls.
+The project evolved through multiple development stages, starting from a
+React frontend prototype and progressing into a full-stack application.
 
-Live at **https://bugboard-nsbm.vercel.app** — deploys automatically from main
-via Vercel, and every PR gets its own preview link. Add `?fail` to the URL to
-see the error state.
+------------------------------------------------------------------------
 
-## Running it
+# Technology Stack
 
-You need Node 20+.
+## Frontend
 
+-   React 19
+-   Vite
+-   React Router DOM
+-   Context API
+-   JavaScript ES Modules
+-   CSS Theme System
+
+## Backend
+
+-   Node.js
+-   Express.js
+-   JWT Authentication
+-   bcrypt password hashing
+-   dotenv
+-   CORS
+-   MongoDB + Mongoose (database integration stage)
+
+------------------------------------------------------------------------
+
+# Project Architecture
+
+    BugBoard
+    |
+    ├── frontend/
+    |   ├── src/
+    |   |   ├── api/
+    |   |   ├── components/
+    |   |   ├── context/
+    |   |   ├── hooks/
+    |   |   ├── pages/
+    |   |   ├── utils/
+    |   |   └── App.jsx
+    |
+    └── backend/
+        └── src/
+            ├── controllers/
+            ├── routes/
+            ├── middleware/
+            ├── services/
+            ├── repositories/
+            ├── utils/
+            ├── app.js
+            └── server.js
+
+------------------------------------------------------------------------
+
+# Frontend Implementation
+
+Completed features:
+
+-   Kanban board interface
+-   Task creation
+-   Task editing
+-   Task deletion
+-   Undo delete functionality
+-   Drag and drop between columns
+-   Mobile touch drag support
+-   Search functionality
+-   Status filtering
+-   Assignee filtering
+-   Task detail page
+-   Light/dark theme
+-   Loading states
+-   Error states
+-   Empty states
+
+The frontend task object is the main application contract:
+
+``` javascript
+{
+  id,
+  key,
+  type,
+  severity,
+  title,
+  assignee,
+  status,
+  dueDate,
+  tag
+}
 ```
+
+------------------------------------------------------------------------
+
+# Backend Implementation
+
+Completed features:
+
+-   Express REST API
+-   Authentication system
+-   User registration
+-   User login
+-   JWT token generation
+-   JWT verification middleware
+-   Protected task routes
+-   Task CRUD APIs
+-   Frontend-compatible task response format
+
+------------------------------------------------------------------------
+
+# Authentication Flow
+
+    User
+     |
+    Register/Login
+     |
+    Backend validates credentials
+     |
+    JWT token generated
+     |
+    Frontend stores token
+     |
+    Frontend sends token with requests
+     |
+    Backend verifies JWT
+     |
+    Protected APIs become available
+
+Authorization format:
+
+    Authorization: Bearer JWT_TOKEN
+
+------------------------------------------------------------------------
+
+# API Structure
+
+## Authentication Routes
+
+    POST /api/auth/register
+    POST /api/auth/login
+    GET  /api/auth/me
+
+## Task Routes
+
+    GET    /api/tasks
+    POST   /api/tasks
+    PATCH  /api/tasks/:id
+    DELETE /api/tasks/:id
+
+------------------------------------------------------------------------
+
+# Frontend-Backend Integration
+
+Completed:
+
+-   Removed dependency on fake task storage
+-   Connected frontend API layer with Express backend
+-   Added JWT authorization headers
+-   Backend responses follow frontend contract
+-   Protected API communication
+
+------------------------------------------------------------------------
+
+# Current Status
+
+## Completed
+
+✅ React frontend\
+✅ Express backend\
+✅ JWT authentication\
+✅ Protected routes\
+✅ Frontend-backend connection\
+✅ Task CRUD operations\
+✅ User authentication\
+✅ Logout functionality\
+✅ API documentation
+
+## Future Improvements
+
+-   MongoDB persistence
+-   Real-time updates with Socket.io
+-   Automated testing
+-   CI/CD pipeline
+-   Docker deployment
+-   Production deployment improvements
+
+------------------------------------------------------------------------
+
+# Development Commands
+
+## Frontend
+
+``` bash
 cd frontend
 npm install
 npm run dev
 ```
 
-Opens on http://localhost:5173.
+Runs:
 
-`npm run build` for a production build, `npm run lint` to lint.
+    http://localhost:5173
 
-## Repo layout
+## Backend
 
-```
-frontend/          Vite + React app
-  src/
-    api/           fake api for now (delay + localStorage), real fetch later
-    components/    TaskCard, Column, TopBar, TaskForm, Dropdown, states, ...
-    context/       TaskProvider (board state) and ThemeProvider
-    data/          seed tasks, status constants, team members
-    hooks/         useTasks / useTheme
-    pages/         BoardPage, TaskDetail, NotFound
-    utils/         filtering, date helpers, note colours
-```
-
-## Working agreement
-
-Feature branches + PRs into main. Don't push straight to main, and don't squash —
-commit history is part of the grading. Roles rotate each session so everyone
-touches frontend, backend and testing at some point.
-
-## Notes
-
-- `npm audit` flags a high severity issue in react-router. It only applies to RSC
-  server mode which we don't use (plain Vite SPA), and the suggested fix is
-  actually a downgrade, so we're ignoring it.
-- The Vite template ships with oxlint now instead of ESLint. Both are installed
-  at the moment — we'll pick one and delete the other.
-
-## Backend (Session 2)
-
-The `backend/` folder contains the Node.js + Express REST API that replaces the frontend mock API layer.
-
-### Backend Stack
-
-- Node.js
-- Express.js
-- MongoDB + Mongoose
-- JWT Authentication
-- bcrypt
-- dotenv
-- CORS
-
-### Backend Structure
-
-```text
-backend/
-  src/
-    config/
-    controllers/
-    models/
-    routes/
-    middleware/
-    services/
-    repositories/
-    utils/
-    app.js
-    server.js
-```
-
-### Running Backend
-
-```bash
+``` bash
 cd backend
 npm install
 npm run dev
 ```
 
-The frontend will communicate with the backend API instead of the current mock API layer once the integration is completed.
+Runs:
+
+    http://localhost:4000
+
+------------------------------------------------------------------------
+
+# Development Rules
+
+-   Keep frontend task structure as the main API contract.
+-   Components should not directly handle API requests.
+-   Use API modules for backend communication.
+-   Keep authentication logic inside authentication context/hooks.
+-   Avoid hardcoding status values.
+-   Use feature branches and pull requests for changes.
+
+------------------------------------------------------------------------
+
+# Project Documentation
+
+Detailed documentation exists in:
+
+-   Frontend README
+-   Backend README
+-   API Documentation
+
+This document provides the overall project understanding for developers
+and future maintenance.

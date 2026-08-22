@@ -1,14 +1,13 @@
 import React from "react";
-import {
-  Routes,
-  Route,
-} from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 
 import BoardPage from "./pages/BoardPage";
 import TaskDetail from "./pages/TaskDetail";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+
+import ProtectedRoute from "./components/ProtectedRoute";
 
 import { TaskProvider } from "./context/TaskContext";
 import { AuthProvider } from "./context/AuthContext";
@@ -22,12 +21,20 @@ function App() {
         <Routes>
           <Route
             path="/"
-            element={<BoardPage />}
+            element={
+              <ProtectedRoute>
+                <BoardPage />
+              </ProtectedRoute>
+            }
           />
 
           <Route
             path="/tasks/:id"
-            element={<TaskDetail />}
+            element={
+              <ProtectedRoute>
+                <TaskDetail />
+              </ProtectedRoute>
+            }
           />
 
           <Route
