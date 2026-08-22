@@ -28,10 +28,11 @@ function Login() {
   return (
     <div className="auth-page">
       <form
-        className="auth-card"
+        className="card auth-card"
         onSubmit={handleSubmit}
       >
-        <h2>Login</h2>
+        <span className="logo">bugboard</span>
+        <h2>Log in</h2>
 
         {error && (
           <p className="form-error">
@@ -40,6 +41,7 @@ function Login() {
         )}
 
         <input
+          className="auth-input"
           type="text"
           placeholder="Username"
           value={username}
@@ -49,6 +51,7 @@ function Login() {
         />
 
         <input
+          className="auth-input"
           type="password"
           placeholder="Password"
           value={password}
@@ -57,11 +60,11 @@ function Login() {
           }
         />
 
-        <button type="submit">
+        <button className="auth-submit" type="submit">
           Login
         </button>
 
-        <p>
+        <p className="auth-alt-action">
           Don't have an account?{" "}
           <Link to="/register">
             Register

@@ -30,10 +30,11 @@ function Register() {
   return (
     <div className="auth-page">
       <form
-        className="auth-card"
+        className="card auth-card"
         onSubmit={handleSubmit}
       >
-        <h2>Create Account</h2>
+        <span className="logo">bugboard</span>
+        <h2>Create account</h2>
 
         {error && (
           <p className="form-error">
@@ -42,6 +43,7 @@ function Register() {
         )}
 
         <input
+          className="auth-input"
           type="text"
           placeholder="Username"
           value={username}
@@ -51,6 +53,7 @@ function Register() {
         />
 
         <input
+          className="auth-input"
           type="password"
           placeholder="Password"
           value={password}
@@ -59,11 +62,11 @@ function Register() {
           }
         />
 
-        <button type="submit">
+        <button className="auth-submit" type="submit">
           Register
         </button>
 
-        <p>
+        <p className="auth-alt-action">
           Already have an account?{" "}
           <Link to="/login">
             Login
