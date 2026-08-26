@@ -13,10 +13,22 @@ const keyCounters = {
   TASK: seedKeyCounter("TASK"),
 };
 
-const nextKeyFor = (type) => {
-  const prefix = type === "bug" ? "BUG" : "TASK";
+const dbMaxKeyNumber = async (prefix) => {
+  const docs = await Task.find({ key: new RegExp(`^${prefix}-\\d+$`) })
+    .select("key")
+    .lean();
 
-  keyCounters[prefix] += 1;
+  return docs
+    .map((doc) => Number(doc.key.split("-")[1]))
+    .filter((n) => !Number.isNaN(n))
+    .reduce((max, n) => Math.max(max, n), 0);
+};
+
+const nextKeyFor = async (type) => {
+  const prefix = type === "bug" ? "BUG" : "TASK";
+  const dbMax = await dbMaxKeyNumber(prefix);
+
+  keyCounters[prefix] = Math.max(keyCounters[prefix], dbMax) + 1;
 
   return `${prefix}-${keyCounters[prefix]}`;
 };
@@ -26,6 +38,18 @@ let idCounter =
     (max, task) => Math.max(max, Number(task.id) || 0),
     0,
   ) + 1;
+
+const nextId = async () => {
+  const docs = await Task.find().select("id").lean();
+  const dbMax = docs.reduce(
+    (max, doc) => Math.max(max, Number(doc.id) || 0),
+    0,
+  );
+
+  idCounter = Math.max(idCounter, dbMax + 1);
+
+  return String(idCounter++);
+};
 
 const taskRepository = {
   getAllTasks: async () => {
@@ -40,8 +64,8 @@ const taskRepository = {
     const type = taskData.type || "task";
 
     const newTask = await Task.create({
-      id: String(idCounter++),
-      key: nextKeyFor(type),
+      id: await nextId(),
+      key: await nextKeyFor(type),
       type,
       severity:
         type === "bug"
@@ -50,14 +74,19 @@ const taskRepository = {
       title: taskData.title,
       assignee: taskData.assignee || "Unassigned",
       status: taskData.status || "To Do",
-      dueDate: taskData.dueDate || null,
-      tag: taskData.tag || null,
+      dueDate: taskData.dueDate,
+      tag: taskData.tag || undefined,
     });
 
-    return newTask.toObject();
+    const plainTask = newTask.toObject();
+
+    // keep the mock array in sync until updateTask/deleteTask move to MongoDB
+    tasks.push(plainTask);
+
+    return plainTask;
   },
 
-  updateTask: (id, updates) => {
+  updateTask: async (id, updates) => {
     const task = tasks.find((task) => task.id === id);
 
     if (!task) return null;
@@ -81,7 +110,7 @@ const taskRepository = {
     });
 
     if (updates.type && updates.type !== previousType) {
-      task.key = nextKeyFor(updates.type);
+      task.key = await nextKeyFor(updates.type);
 
       if (updates.type !== "bug") {
         task.severity = null;

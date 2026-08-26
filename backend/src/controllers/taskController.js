@@ -39,6 +39,12 @@ const taskController = {
         });
       }
 
+      if (!req.body.dueDate) {
+        return res.status(400).json({
+          message: "Due date is required.",
+        });
+      }
+
       const task = await taskRepository.createTask(req.body);
 
       res.status(201).json(task);
@@ -51,7 +57,7 @@ const taskController = {
     }
   },
 
-  updateTask: (req, res) => {
+  updateTask: async (req, res) => {
     try {
       const { id } = req.params;
       const updates = req.body;
@@ -75,7 +81,7 @@ const taskController = {
         });
       }
 
-      const updatedTask = taskRepository.updateTask(
+      const updatedTask = await taskRepository.updateTask(
         id,
         updates,
       );
