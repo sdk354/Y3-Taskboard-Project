@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import mongoose from "mongoose";
 import taskRoutes from "./routes/taskRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 
@@ -17,7 +18,11 @@ app.use("/api/auth", authRoutes);
 app.use("/api/tasks", taskRoutes);
 
 app.get("/api/health", (req, res) => {
-    res.json({ status: "ok", uptime: Math.round(process.uptime()) });
+    res.json({
+        status: "ok",
+        uptime: Math.round(process.uptime()),
+        db: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
+    });
 });
 
 // 404 Route Handler
