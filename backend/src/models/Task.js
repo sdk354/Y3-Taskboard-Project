@@ -66,7 +66,6 @@ const taskSchema = new mongoose.Schema(
 
     tag: {
       type: String,
-      required: true,
       trim: true,
     },
   },

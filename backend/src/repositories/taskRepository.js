@@ -1,4 +1,5 @@
 import tasks from "../utils/mockTasks.js";
+import Task from "../models/Task.js";
 
 const seedKeyCounter = (prefix) =>
   tasks
@@ -7,44 +8,85 @@ const seedKeyCounter = (prefix) =>
     .filter((n) => !Number.isNaN(n))
     .reduce((max, n) => Math.max(max, n), 100);
 
-const keyCounters = { BUG: seedKeyCounter("BUG"), TASK: seedKeyCounter("TASK") };
+const keyCounters = {
+  BUG: seedKeyCounter("BUG"),
+  TASK: seedKeyCounter("TASK"),
+};
 
-const nextKeyFor = (type) => {
+const dbMaxKeyNumber = async (prefix) => {
+  const docs = await Task.find({ key: new RegExp(`^${prefix}-\\d+$`) })
+    .select("key")
+    .lean();
+
+  return docs
+    .map((doc) => Number(doc.key.split("-")[1]))
+    .filter((n) => !Number.isNaN(n))
+    .reduce((max, n) => Math.max(max, n), 0);
+};
+
+const nextKeyFor = async (type) => {
   const prefix = type === "bug" ? "BUG" : "TASK";
-  keyCounters[prefix] += 1;
+  const dbMax = await dbMaxKeyNumber(prefix);
+
+  keyCounters[prefix] = Math.max(keyCounters[prefix], dbMax) + 1;
+
   return `${prefix}-${keyCounters[prefix]}`;
 };
 
 let idCounter =
-  tasks.reduce((max, task) => Math.max(max, Number(task.id) || 0), 0) + 1;
+  tasks.reduce(
+    (max, task) => Math.max(max, Number(task.id) || 0),
+    0,
+  ) + 1;
+
+const nextId = async () => {
+  const docs = await Task.find().select("id").lean();
+  const dbMax = docs.reduce(
+    (max, doc) => Math.max(max, Number(doc.id) || 0),
+    0,
+  );
+
+  idCounter = Math.max(idCounter, dbMax + 1);
+
+  return String(idCounter++);
+};
 
 const taskRepository = {
-  getAllTasks: () => tasks,
-
-  getTaskById: (id) => {
-    return tasks.find((task) => task.id === id);
+  getAllTasks: async () => {
+    return await Task.find().lean();
   },
 
-  createTask: (taskData) => {
+  getTaskById: async (id) => {
+    return await Task.findOne({ id }).lean();
+  },
+
+  createTask: async (taskData) => {
     const type = taskData.type || "task";
 
-    const newTask = {
-      id: String(idCounter++),
-      key: nextKeyFor(type),
+    const newTask = await Task.create({
+      id: await nextId(),
+      key: await nextKeyFor(type),
       type,
-      severity: type === "bug" ? taskData.severity || "major" : null,
+      severity:
+        type === "bug"
+          ? taskData.severity || "major"
+          : null,
       title: taskData.title,
       assignee: taskData.assignee || "Unassigned",
       status: taskData.status || "To Do",
-      dueDate: taskData.dueDate || null,
-      tag: taskData.tag || null,
-    };
+      dueDate: taskData.dueDate,
+      tag: taskData.tag || undefined,
+    });
 
-    tasks.push(newTask);
-    return newTask;
+    const plainTask = newTask.toObject();
+
+    // keep the mock array in sync until updateTask/deleteTask move to MongoDB
+    tasks.push(plainTask);
+
+    return plainTask;
   },
 
-  updateTask: (id, updates) => {
+  updateTask: async (id, updates) => {
     const task = tasks.find((task) => task.id === id);
 
     if (!task) return null;
@@ -68,8 +110,11 @@ const taskRepository = {
     });
 
     if (updates.type && updates.type !== previousType) {
-      task.key = nextKeyFor(updates.type);
-      if (updates.type !== "bug") task.severity = null;
+      task.key = await nextKeyFor(updates.type);
+
+      if (updates.type !== "bug") {
+        task.severity = null;
+      }
     }
 
     return task;
