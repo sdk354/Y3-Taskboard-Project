@@ -8,17 +8,21 @@ const allowedStatuses = [
 ];
 
 const taskController = {
-  getAllTasks: (req, res) => {
+  getAllTasks: async (req, res) => {
     try {
-      res.status(200).json(taskRepository.getAllTasks());
-    } catch {
+      const tasks = await taskRepository.getAllTasks();
+
+      res.status(200).json(tasks);
+    } catch (error) {
+      console.error(error);
+
       res.status(500).json({
         message: "Server error retrieving tasks",
       });
     }
   },
 
-  createTask: (req, res) => {
+  createTask: async (req, res) => {
     try {
       const { title, type } = req.body;
 
@@ -35,10 +39,12 @@ const taskController = {
         });
       }
 
-      const task = taskRepository.createTask(req.body);
+      const task = await taskRepository.createTask(req.body);
 
       res.status(201).json(task);
-    } catch {
+    } catch (error) {
+      console.error(error);
+
       res.status(500).json({
         message: "Server error creating task",
       });
@@ -69,7 +75,10 @@ const taskController = {
         });
       }
 
-      const updatedTask = taskRepository.updateTask(id, updates);
+      const updatedTask = taskRepository.updateTask(
+        id,
+        updates,
+      );
 
       if (!updatedTask) {
         return res.status(404).json({
@@ -89,7 +98,9 @@ const taskController = {
 
   deleteTask: (req, res) => {
     try {
-      const deletedTask = taskRepository.deleteTask(req.params.id);
+      const deletedTask = taskRepository.deleteTask(
+        req.params.id,
+      );
 
       if (!deletedTask) {
         return res.status(404).json({
@@ -101,7 +112,9 @@ const taskController = {
         message: "Task deleted successfully.",
         task: deletedTask,
       });
-    } catch {
+    } catch (error) {
+      console.error(error);
+
       res.status(500).json({
         message: "Server error deleting task",
       });
