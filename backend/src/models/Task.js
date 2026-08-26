@@ -26,6 +26,9 @@ const taskSchema = new mongoose.Schema(
       type: String,
       enum: ["critical", "major", "minor"],
       default: null,
+      required: function () {
+        return this.type === "bug";
+      },
     },
 
     title: {
@@ -51,7 +54,14 @@ const taskSchema = new mongoose.Schema(
     dueDate: {
       type: String,
       required: true,
-      match: /^\d{4}-\d{2}-\d{2}$/,
+      validate: {
+        validator: function (v) {
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(v)) return false;
+          const date = new Date(v);
+          return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === v;
+        },
+        message: (props) => `${props.value} is not a valid date`,
+      },
     },
 
     tag: {

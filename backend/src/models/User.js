@@ -13,15 +13,13 @@ const userSchema = new mongoose.Schema(
     passwordHash: {
       type: String,
       required: true,
+      select: false,
     },
   },
   {
     timestamps: true,
   }
 );
-
-// Index used when searching users during login/register
-userSchema.index({ username: 1 });
 
 const User = mongoose.model("User", userSchema);
 
