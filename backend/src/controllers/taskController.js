@@ -96,15 +96,21 @@ const taskController = {
     } catch (error) {
       console.error(error);
 
+      if (error.name === "CastError") {
+        return res.status(400).json({
+          message: "Invalid task ID.",
+        });
+      }
+
       res.status(500).json({
         message: "Server error updating task",
       });
     }
   },
 
-  deleteTask: (req, res) => {
+  deleteTask: async (req, res) => {
     try {
-      const deletedTask = taskRepository.deleteTask(
+      const deletedTask = await taskRepository.deleteTask(
         req.params.id,
       );
 
@@ -120,6 +126,12 @@ const taskController = {
       });
     } catch (error) {
       console.error(error);
+
+      if (error.name === "CastError") {
+        return res.status(400).json({
+          message: "Invalid task ID.",
+        });
+      }
 
       res.status(500).json({
         message: "Server error deleting task",
