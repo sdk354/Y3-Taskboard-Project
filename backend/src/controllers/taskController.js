@@ -102,6 +102,18 @@ const taskController = {
         });
       }
 
+      if (error.name === "ValidationError") {
+        return res.status(400).json({
+          message: error.message,
+        });
+      }
+
+      if (error.status) {
+        return res.status(error.status).json({
+          message: error.message,
+        });
+      }
+
       res.status(500).json({
         message: "Server error updating task",
       });

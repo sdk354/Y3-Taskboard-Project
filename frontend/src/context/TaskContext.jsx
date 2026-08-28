@@ -18,6 +18,13 @@ export const TaskProvider = ({ children }) => {
   const [status, setStatus] = useState("loading");
   const [error, setError] = useState(null);
 
+  // lets deleteTask/updateTask read the latest tasks without depending
+  // on them, so their identity stays stable across renders
+  const tasksRef = useRef(tasks);
+  useEffect(() => {
+    tasksRef.current = tasks;
+  }, [tasks]);
+
   // for the undo toast
   const [lastDeleted, setLastDeleted] = useState(null);
   const undoTimer = useRef(null);
@@ -58,52 +65,53 @@ export const TaskProvider = ({ children }) => {
     }
   }, []);
 
-  const deleteTask = useCallback(
-    async (taskId) => {
-      const index = tasks.findIndex(
-        (task) => task.id === taskId,
-      );
+  const deleteTask = useCallback(async (taskId) => {
+    const index = tasksRef.current.findIndex(
+      (task) => task.id === taskId,
+    );
 
-      if (index === -1) return;
+    if (index === -1) return false;
 
-      const task = tasks[index];
+    const task = tasksRef.current[index];
 
-      // optimistic UI update
-      setTasks((prev) =>
-        prev.filter((item) => item.id !== taskId),
-      );
+    // optimistic UI update
+    setTasks((prev) =>
+      prev.filter((item) => item.id !== taskId),
+    );
 
-      try {
-        // MongoDB delete needs _id, not the custom task.id
-        await api.deleteTask(task._id);
+    try {
+      // MongoDB delete needs _id, not the custom task.id
+      await api.deleteTask(task._id);
 
-        setLastDeleted({
+      setLastDeleted({
+        task,
+        index,
+      });
+
+      clearTimeout(undoTimer.current);
+
+      undoTimer.current = setTimeout(() => {
+        setLastDeleted(null);
+      }, 6000);
+
+      return true;
+    } catch (err) {
+      // restore task if the database delete fails
+      setTasks((prev) => {
+        const next = [...prev];
+        next.splice(
+          Math.min(index, next.length),
+          0,
           task,
-          index,
-        });
+        );
+        return next;
+      });
 
-        clearTimeout(undoTimer.current);
+      setError(err.message);
 
-        undoTimer.current = setTimeout(() => {
-          setLastDeleted(null);
-        }, 6000);
-      } catch (err) {
-        // restore task if the database delete fails
-        setTasks((prev) => {
-          const next = [...prev];
-          next.splice(
-            Math.min(index, next.length),
-            0,
-            task,
-          );
-          return next;
-        });
-
-        setError(err.message);
-      }
-    },
-    [tasks],
-  );
+      return false;
+    }
+  }, []);
 
   const undoDelete = useCallback(async () => {
     if (!lastDeleted) return;
@@ -111,10 +119,11 @@ export const TaskProvider = ({ children }) => {
     clearTimeout(undoTimer.current);
 
     const { task, index } = lastDeleted;
-    setLastDeleted(null);
 
     try {
       const created = await api.createTask(task);
+
+      setLastDeleted(null);
 
       setTasks((prev) => {
         const next = [...prev];
@@ -129,58 +138,60 @@ export const TaskProvider = ({ children }) => {
       });
     } catch (err) {
       setError(err.message);
+
+      // keep the toast around so the user can retry the undo
+      undoTimer.current = setTimeout(() => {
+        setLastDeleted(null);
+      }, 6000);
     }
   }, [lastDeleted]);
 
-  const updateTask = useCallback(
-    async (taskId, changes) => {
-      const task = tasks.find(
-        (item) => item.id === taskId,
+  const updateTask = useCallback(async (taskId, changes) => {
+    const task = tasksRef.current.find(
+      (item) => item.id === taskId,
+    );
+
+    if (!task) return false;
+
+    const previousTask = { ...task };
+
+    // optimistic UI update
+    setTasks((prev) =>
+      prev.map((item) =>
+        item.id === taskId
+          ? { ...item, ...changes }
+          : item,
+      ),
+    );
+
+    try {
+      // MongoDB update needs _id, not the custom task.id
+      const updatedTask = await api.updateTask(
+        task._id,
+        changes,
       );
 
-      if (!task) return;
-
-      const previousTask = { ...task };
-
-      // optimistic UI update
+      // replace optimistic version with actual DB response
       setTasks((prev) =>
         prev.map((item) =>
-          item.id === taskId
-            ? { ...item, ...changes }
-            : item,
+          item.id === taskId ? updatedTask : item,
         ),
       );
 
-      try {
-        // MongoDB update needs _id, not the custom task.id
-        const updatedTask = await api.updateTask(
-          task._id,
-          changes,
-        );
+      return true;
+    } catch (err) {
+      // rollback if MongoDB update fails
+      setTasks((prev) =>
+        prev.map((item) =>
+          item.id === taskId ? previousTask : item,
+        ),
+      );
 
-        // replace optimistic version with actual DB response
-        setTasks((prev) =>
-          prev.map((item) =>
-            item.id === taskId
-              ? updatedTask
-              : item,
-          ),
-        );
-      } catch (err) {
-        // rollback if MongoDB update fails
-        setTasks((prev) =>
-          prev.map((item) =>
-            item.id === taskId
-              ? previousTask
-              : item,
-          ),
-        );
+      setError(err.message);
 
-        setError(err.message);
-      }
-    },
-    [tasks],
-  );
+      return false;
+    }
+  }, []);
 
   const moveTask = useCallback(
     (taskId, newStatus) => {

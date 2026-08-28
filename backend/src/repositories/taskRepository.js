@@ -1,5 +1,6 @@
 import tasks from "../utils/mockTasks.js";
 import Task from "../models/Task.js";
+import { AppError } from "../utils/AppError.js";
 
 const seedKeyCounter = (prefix) =>
   tasks
@@ -82,22 +83,10 @@ const taskRepository = {
       tag: taskData.tag || undefined,
     });
 
-    const plainTask = newTask.toObject();
-
-    tasks.push(plainTask);
-
-    return plainTask;
+    return newTask.toObject();
   },
 
   updateTask: async (id, updates) => {
-    const existingTask = await Task.findById(id);
-
-    if (!existingTask) {
-      return null;
-    }
-
-    const previousType = existingTask.type;
-
     const allowedFields = [
       "title",
       "type",
@@ -116,27 +105,48 @@ const taskRepository = {
       }
     });
 
-    if (
-      updates.type &&
-      updates.type !== previousType
-    ) {
-      updateData.key = await nextKeyFor(updates.type);
+    // severity is conditional on type, and the schema's required-if-bug
+    // validator can't see that through Mongoose's update validators - only
+    // look this up when type or severity is actually part of the update
+    if (updates.type !== undefined || updates.severity !== undefined) {
+      const existingTask = await Task.findById(id)
+        .select("type severity")
+        .lean();
 
-      if (updates.type !== "bug") {
+      if (!existingTask) return null;
+
+      const previousType = existingTask.type;
+      const finalType = updates.type || previousType;
+
+      if (finalType === "bug") {
+        const severityProvided = updates.severity !== undefined;
+        const finalSeverity = severityProvided
+          ? updates.severity
+          : existingTask.severity;
+
+        if (!finalSeverity) {
+          if (previousType !== "bug") {
+            updateData.severity = "major";
+          } else {
+            throw new AppError(
+              "Severity is required for bug-type tasks.",
+              400,
+            );
+          }
+        }
+      } else {
         updateData.severity = null;
-      } else if (!updates.severity) {
-        updateData.severity = "major";
+      }
+
+      if (updates.type && updates.type !== previousType) {
+        updateData.key = await nextKeyFor(updates.type);
       }
     }
 
-    return await Task.findByIdAndUpdate(
-      id,
-      updateData,
-      {
-        new: true,
-        runValidators: true,
-      },
-    ).lean();
+    return await Task.findByIdAndUpdate(id, updateData, {
+      new: true,
+      runValidators: true,
+    }).lean();
   },
 
   deleteTask: async (id) => {
