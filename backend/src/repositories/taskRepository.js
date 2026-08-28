@@ -1,5 +1,6 @@
 import tasks from "../utils/mockTasks.js";
 import Task from "../models/Task.js";
+import { AppError } from "../utils/AppError.js";
 
 const seedKeyCounter = (prefix) =>
   tasks
@@ -14,7 +15,9 @@ const keyCounters = {
 };
 
 const dbMaxKeyNumber = async (prefix) => {
-  const docs = await Task.find({ key: new RegExp(`^${prefix}-\\d+$`) })
+  const docs = await Task.find({
+    key: new RegExp(`^${prefix}-\\d+$`),
+  })
     .select("key")
     .lean();
 
@@ -28,7 +31,8 @@ const nextKeyFor = async (type) => {
   const prefix = type === "bug" ? "BUG" : "TASK";
   const dbMax = await dbMaxKeyNumber(prefix);
 
-  keyCounters[prefix] = Math.max(keyCounters[prefix], dbMax) + 1;
+  keyCounters[prefix] =
+    Math.max(keyCounters[prefix], dbMax) + 1;
 
   return `${prefix}-${keyCounters[prefix]}`;
 };
@@ -41,6 +45,7 @@ let idCounter =
 
 const nextId = async () => {
   const docs = await Task.find().select("id").lean();
+
   const dbMax = docs.reduce(
     (max, doc) => Math.max(max, Number(doc.id) || 0),
     0,
@@ -78,21 +83,10 @@ const taskRepository = {
       tag: taskData.tag || undefined,
     });
 
-    const plainTask = newTask.toObject();
-
-    // keep the mock array in sync until updateTask/deleteTask move to MongoDB
-    tasks.push(plainTask);
-
-    return plainTask;
+    return newTask.toObject();
   },
 
   updateTask: async (id, updates) => {
-    const task = tasks.find((task) => task.id === id);
-
-    if (!task) return null;
-
-    const previousType = task.type;
-
     const allowedFields = [
       "title",
       "type",
@@ -103,29 +97,60 @@ const taskRepository = {
       "tag",
     ];
 
+    const updateData = {};
+
     allowedFields.forEach((field) => {
       if (updates[field] !== undefined) {
-        task[field] = updates[field];
+        updateData[field] = updates[field];
       }
     });
 
-    if (updates.type && updates.type !== previousType) {
-      task.key = await nextKeyFor(updates.type);
+    // severity is conditional on type, and the schema's required-if-bug
+    // validator can't see that through Mongoose's update validators - only
+    // look this up when type or severity is actually part of the update
+    if (updates.type !== undefined || updates.severity !== undefined) {
+      const existingTask = await Task.findById(id)
+        .select("type severity")
+        .lean();
 
-      if (updates.type !== "bug") {
-        task.severity = null;
+      if (!existingTask) return null;
+
+      const previousType = existingTask.type;
+      const finalType = updates.type || previousType;
+
+      if (finalType === "bug") {
+        const severityProvided = updates.severity !== undefined;
+        const finalSeverity = severityProvided
+          ? updates.severity
+          : existingTask.severity;
+
+        if (!finalSeverity) {
+          if (previousType !== "bug") {
+            updateData.severity = "major";
+          } else {
+            throw new AppError(
+              "Severity is required for bug-type tasks.",
+              400,
+            );
+          }
+        }
+      } else {
+        updateData.severity = null;
+      }
+
+      if (updates.type && updates.type !== previousType) {
+        updateData.key = await nextKeyFor(updates.type);
       }
     }
 
-    return task;
+    return await Task.findByIdAndUpdate(id, updateData, {
+      new: true,
+      runValidators: true,
+    }).lean();
   },
 
-  deleteTask: (id) => {
-    const index = tasks.findIndex((task) => task.id === id);
-
-    if (index === -1) return null;
-
-    return tasks.splice(index, 1)[0];
+  deleteTask: async (id) => {
+    return await Task.findByIdAndDelete(id).lean();
   },
 };
 

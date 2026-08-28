@@ -46,7 +46,7 @@ function TaskDetail() {
     setFormError("");
   };
 
-  const saveEdit = (e) => {
+  const saveEdit = async (e) => {
     e.preventDefault();
     if (!draft.title || draft.title.trim().length < 3) {
       setFormError("Title must be at least 3 characters.");
@@ -56,7 +56,7 @@ function TaskDetail() {
       setFormError("Due date is required.");
       return;
     }
-    updateTask(task.id, {
+    const ok = await updateTask(task.id, {
       title: draft.title.trim(),
       type: draft.type,
       severity: draft.type === "bug" ? draft.severity : null,
@@ -65,12 +65,18 @@ function TaskDetail() {
       dueDate: draft.dueDate,
       tag: draft.tag.trim() || null,
     });
-    setDraft(null);
+    if (ok) {
+      setDraft(null);
+    } else {
+      setFormError("Couldn't save changes. Try again.");
+    }
   };
 
-  const handleDelete = () => {
-    deleteTask(task.id);
-    navigate("/");
+  const handleDelete = async () => {
+    const ok = await deleteTask(task.id);
+    if (ok) {
+      navigate("/");
+    }
   };
 
   const set = (key) => (e) => setDraft({ ...draft, [key]: e.target.value });
