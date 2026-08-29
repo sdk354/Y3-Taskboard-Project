@@ -105,16 +105,37 @@ const taskRepository = {
       }
     });
 
-    // severity is conditional on type, and the schema's required-if-bug
-    // validator can't see that through Mongoose's update validators - only
-    // look this up when type or severity is actually part of the update
+    // Version is required for optimistic concurrency control
+    const expectedVersion = Number(updates.version);
+
+    if (!Number.isInteger(expectedVersion) || expectedVersion < 0) {
+      throw new AppError(
+        "A valid task version is required for updates.",
+        400,
+      );
+    }
+
+    // routes use the Mongo _id, not the custom task id
+    const existingTask = await Task.findById(id).lean();
+
+    if (!existingTask) {
+      return null;
+    }
+
+    // tasks written before version existed have no version field - treat
+    // that as version 0 rather than rejecting every one as a conflict
+    const currentVersion = existingTask.version ?? 0;
+
+    // Reject stale updates
+    if (currentVersion !== expectedVersion) {
+      throw new AppError(
+        "Task was modified by another user. Please refresh and try again.",
+        409,
+      );
+    }
+
+    // Severity is conditional on type
     if (updates.type !== undefined || updates.severity !== undefined) {
-      const existingTask = await Task.findById(id)
-        .select("type severity")
-        .lean();
-
-      if (!existingTask) return null;
-
       const previousType = existingTask.type;
       const finalType = updates.type || previousType;
 
@@ -143,10 +164,33 @@ const taskRepository = {
       }
     }
 
-    return await Task.findByIdAndUpdate(id, updateData, {
-      new: true,
-      runValidators: true,
-    }).lean();
+    // atomic version check + update - match docs missing a version field
+    // too, since those are being treated as version 0 above
+    const versionFilter =
+      expectedVersion === 0
+        ? { $or: [{ version: 0 }, { version: { $exists: false } }] }
+        : { version: expectedVersion };
+
+    const updatedTask = await Task.findOneAndUpdate(
+      { _id: id, ...versionFilter },
+      {
+        $set: { ...updateData, version: currentVersion + 1 },
+      },
+      {
+        new: true,
+        runValidators: true,
+      },
+    ).lean();
+
+    // Detect conflict if the task changed between the read and update
+    if (!updatedTask) {
+      throw new AppError(
+        "Task was modified by another user. Please refresh and try again.",
+        409,
+      );
+    }
+
+    return updatedTask;
   },
 
   deleteTask: async (id) => {

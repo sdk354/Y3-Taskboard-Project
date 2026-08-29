@@ -165,10 +165,12 @@ export const TaskProvider = ({ children }) => {
     );
 
     try {
-      // MongoDB update needs _id, not the custom task.id
+      // MongoDB update needs _id, not the custom task.id - version is
+      // the task's version as last seen by this client, for the
+      // backend's optimistic concurrency check
       const updatedTask = await api.updateTask(
         task._id,
-        changes,
+        { ...changes, version: task.version },
       );
 
       // replace optimistic version with actual DB response

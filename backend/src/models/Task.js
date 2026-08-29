@@ -57,8 +57,13 @@ const taskSchema = new mongoose.Schema(
       validate: {
         validator: function (v) {
           if (!/^\d{4}-\d{2}-\d{2}$/.test(v)) return false;
+
           const date = new Date(v);
-          return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === v;
+
+          return (
+            !Number.isNaN(date.getTime()) &&
+            date.toISOString().slice(0, 10) === v
+          );
         },
         message: (props) => `${props.value} is not a valid date`,
       },
@@ -67,6 +72,11 @@ const taskSchema = new mongoose.Schema(
     tag: {
       type: String,
       trim: true,
+    },
+
+    version: {
+      type: Number,
+      default: 0,
     },
   },
   {
