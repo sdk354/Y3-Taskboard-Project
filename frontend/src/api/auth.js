@@ -5,7 +5,7 @@ const API_URL = `${BASE_URL}/api/auth`;
 const errorMessage = (data, fallback) =>
   data.errors?.map((e) => e.message).join(" ") || data.error || fallback;
 
-export async function register(username, password) {
+export async function register(username, email, password) {
   const response = await fetch(`${API_URL}/register`, {
     method: "POST",
     headers: {
@@ -13,6 +13,7 @@ export async function register(username, password) {
     },
     body: JSON.stringify({
       username,
+      email,
       password,
     }),
   });
