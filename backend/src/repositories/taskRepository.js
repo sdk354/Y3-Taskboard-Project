@@ -105,16 +105,33 @@ const taskRepository = {
       }
     });
 
-    // severity is conditional on type, and the schema's required-if-bug
-    // validator can't see that through Mongoose's update validators - only
-    // look this up when type or severity is actually part of the update
+    // Version is required for optimistic concurrency control
+    const expectedVersion = Number(updates.version);
+
+    if (!Number.isInteger(expectedVersion) || expectedVersion < 0) {
+      throw new AppError(
+        "A valid task version is required for updates.",
+        400,
+      );
+    }
+
+    // Find the task using the custom task id
+    const existingTask = await Task.findOne({ id }).lean();
+
+    if (!existingTask) {
+      return null;
+    }
+
+    // Reject stale updates
+    if (existingTask.version !== expectedVersion) {
+      throw new AppError(
+        "Task was modified by another user. Please refresh and try again.",
+        409,
+      );
+    }
+
+    // Severity is conditional on type
     if (updates.type !== undefined || updates.severity !== undefined) {
-      const existingTask = await Task.findById(id)
-        .select("type severity")
-        .lean();
-
-      if (!existingTask) return null;
-
       const previousType = existingTask.type;
       const finalType = updates.type || previousType;
 
@@ -143,14 +160,35 @@ const taskRepository = {
       }
     }
 
-    return await Task.findByIdAndUpdate(id, updateData, {
-      new: true,
-      runValidators: true,
-    }).lean();
+    // Atomic version check + update
+    const updatedTask = await Task.findOneAndUpdate(
+      {
+        id,
+        version: expectedVersion,
+      },
+      {
+        $set: updateData,
+        $inc: { version: 1 },
+      },
+      {
+        new: true,
+        runValidators: true,
+      },
+    ).lean();
+
+    // Detect conflict if the task changed between the read and update
+    if (!updatedTask) {
+      throw new AppError(
+        "Task was modified by another user. Please refresh and try again.",
+        409,
+      );
+    }
+
+    return updatedTask;
   },
 
   deleteTask: async (id) => {
-    return await Task.findByIdAndDelete(id).lean();
+    return await Task.findOneAndDelete({ id }).lean();
   },
 };
 
