@@ -10,7 +10,9 @@ export function findByUsername(username) {
 }
 
 export function findByEmail(email) {
-    return User.findOne({ email }).lean();
+    // schema lowercases email on save, match that here or the
+    // duplicate-registration check misses case-different addresses
+    return User.findOne({ email: email.toLowerCase() }).lean();
 }
 
 export function findById(id) {
