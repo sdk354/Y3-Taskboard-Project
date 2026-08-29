@@ -115,15 +115,19 @@ const taskRepository = {
       );
     }
 
-    // Find the task using the custom task id
-    const existingTask = await Task.findOne({ id }).lean();
+    // routes use the Mongo _id, not the custom task id
+    const existingTask = await Task.findById(id).lean();
 
     if (!existingTask) {
       return null;
     }
 
+    // tasks written before version existed have no version field - treat
+    // that as version 0 rather than rejecting every one as a conflict
+    const currentVersion = existingTask.version ?? 0;
+
     // Reject stale updates
-    if (existingTask.version !== expectedVersion) {
+    if (currentVersion !== expectedVersion) {
       throw new AppError(
         "Task was modified by another user. Please refresh and try again.",
         409,
@@ -160,15 +164,17 @@ const taskRepository = {
       }
     }
 
-    // Atomic version check + update
+    // atomic version check + update - match docs missing a version field
+    // too, since those are being treated as version 0 above
+    const versionFilter =
+      expectedVersion === 0
+        ? { $or: [{ version: 0 }, { version: { $exists: false } }] }
+        : { version: expectedVersion };
+
     const updatedTask = await Task.findOneAndUpdate(
+      { _id: id, ...versionFilter },
       {
-        id,
-        version: expectedVersion,
-      },
-      {
-        $set: updateData,
-        $inc: { version: 1 },
+        $set: { ...updateData, version: currentVersion + 1 },
       },
       {
         new: true,
@@ -188,7 +194,7 @@ const taskRepository = {
   },
 
   deleteTask: async (id) => {
-    return await Task.findOneAndDelete({ id }).lean();
+    return await Task.findByIdAndDelete(id).lean();
   },
 };
 
