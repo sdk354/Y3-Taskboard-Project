@@ -7,6 +7,7 @@ function Register() {
   const navigate = useNavigate();
 
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
@@ -18,6 +19,7 @@ function Register() {
 
       await register(
         username,
+        email,
         password
       );
 
@@ -49,6 +51,16 @@ function Register() {
           value={username}
           onChange={(e) =>
             setUsername(e.target.value)
+          }
+        />
+
+        <input
+          className="auth-input"
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) =>
+            setEmail(e.target.value)
           }
         />
 

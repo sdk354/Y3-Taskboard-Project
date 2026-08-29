@@ -1,22 +1,18 @@
-import users from "../utils/mockUsers.js";
+import User from "../models/User.js";
 
-const numericIds = users.map(u => u.id).filter(id => typeof id === "number");
-let idCounter = numericIds.length ? Math.max(...numericIds) + 1 : 1;
-
-export function getAllUsers() {
-    return users;
+export function create({ username, email, passwordHash }) {
+    return User.create({ username, email, passwordHash });
 }
 
-export function getUserById(id) {
-    return users.find(u => u.id === id);
-}
-
+// needs the hash back to check the password against on login
 export function findByUsername(username) {
-    return users.find(u => u.username === username);
+    return User.findOne({ username }).select("+passwordHash");
 }
 
-export function create({ username, passwordHash }) {
-    const user = { id: idCounter++, username, passwordHash };
-    users.push(user);
-    return user;
+export function findByEmail(email) {
+    return User.findOne({ email }).lean();
+}
+
+export function findById(id) {
+    return User.findById(id).lean();
 }

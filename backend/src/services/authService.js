@@ -3,17 +3,20 @@ import { hashPassword, comparePassword } from "../utils/hash.js";
 import { signToken } from "../utils/jwt.js";
 import { ValidationError, ForbiddenError } from "../utils/AppError.js";
 
-export async function register({ username, password }) {
-    const existing = users.findByUsername(username);
-    if (existing) throw new ValidationError([{ field: "username", message: "Already taken" }]);
+export async function register({ username, email, password }) {
+    const existingUsername = await users.findByUsername(username);
+    if (existingUsername) throw new ValidationError([{ field: "username", message: "Already taken" }]);
+
+    const existingEmail = await users.findByEmail(email);
+    if (existingEmail) throw new ValidationError([{ field: "email", message: "Already registered" }]);
 
     const passwordHash = await hashPassword(password);
-    const user = users.create({ username, passwordHash });
-    return { id: user.id, username: user.username };
+    const user = await users.create({ username, email, passwordHash });
+    return { id: user.id, username: user.username, email: user.email };
 }
 
 export async function login({ username, password }) {
-    const user = users.findByUsername(username);
+    const user = await users.findByUsername(username);
     if (!user) throw new ForbiddenError();
 
     const match = await comparePassword(password, user.passwordHash);
@@ -23,5 +26,5 @@ export async function login({ username, password }) {
 }
 
 export async function getCurrentUser(user) {
-    return { id: user.id, username: user.username };
+    return { id: user._id, username: user.username, email: user.email };
 }

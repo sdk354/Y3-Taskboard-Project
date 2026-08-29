@@ -10,6 +10,14 @@ const userSchema = new mongoose.Schema(
       minlength: 3,
     },
 
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      lowercase: true,
+    },
+
     passwordHash: {
       type: String,
       required: true,
@@ -20,6 +28,16 @@ const userSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+userSchema.set("toJSON", {
+  transform(_doc, ret) {
+    delete ret.passwordHash;
+    ret.id = ret._id.toString();
+    delete ret._id;
+    delete ret.__v;
+    return ret;
+  },
+});
 
 const User = mongoose.model("User", userSchema);
 
