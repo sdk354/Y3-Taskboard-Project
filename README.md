@@ -34,7 +34,7 @@ React frontend prototype and progressing into a full-stack application.
 -   bcrypt password hashing
 -   dotenv
 -   CORS
--   MongoDB + Mongoose (database integration stage)
+-   MongoDB Atlas + Mongoose
 
 ------------------------------------------------------------------------
 
@@ -54,11 +54,15 @@ React frontend prototype and progressing into a full-stack application.
     |
     └── backend/
         └── src/
+            ├── config/
             ├── controllers/
             ├── routes/
             ├── middleware/
             ├── services/
             ├── repositories/
+            ├── models/
+            ├── seeds/
+            ├── validators/
             ├── utils/
             ├── app.js
             └── server.js
@@ -116,6 +120,27 @@ Completed features:
 -   Protected task routes
 -   Task CRUD APIs
 -   Frontend-compatible task response format
+-   MongoDB Atlas persistence via Mongoose (tasks and users)
+-   Database seed script (`npm run seed`)
+-   Optimistic concurrency control on task updates (`version` field, 409 on conflict)
+
+------------------------------------------------------------------------
+
+# Database
+
+Tasks and users are persisted in MongoDB (Atlas in production, a local
+`mongod` for development) via Mongoose schemas.
+
+-   `MONGO_URI` in `backend/.env` points at either a local instance or
+    an Atlas connection string.
+-   `npm run seed` (inside `backend/`) loads the demo users and tasks.
+-   Task documents carry a `version` field and automatic
+    `createdAt`/`updatedAt` timestamps. Updates must include the last
+    known `version`; a stale version is rejected with `409 Conflict`
+    instead of silently overwriting a concurrent edit.
+
+See `backend/README.md` for the full schema, seed data, and
+concurrency-handling notes.
 
 ------------------------------------------------------------------------
 
@@ -184,11 +209,13 @@ Completed:
 ✅ Task CRUD operations\
 ✅ User authentication\
 ✅ Logout functionality\
-✅ API documentation
+✅ API documentation\
+✅ MongoDB Atlas persistence\
+✅ Database seed script\
+✅ Optimistic concurrency control (task versioning)
 
 ## Future Improvements
 
--   MongoDB persistence
 -   Real-time updates with Socket.io
 -   Automated testing
 -   CI/CD pipeline
@@ -216,6 +243,8 @@ Runs:
 ``` bash
 cd backend
 npm install
+cp .env.example .env   # set MONGO_URI (local mongod or an Atlas connection string) and JWT_SECRET
+npm run seed            # optional: load demo users and tasks
 npm run dev
 ```
 
